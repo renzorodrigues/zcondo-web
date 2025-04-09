@@ -2,9 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Cookies from 'js-cookie';
-// Removendo a importação não utilizada
-// import { api } from '@/services/api';
 
 interface User {
   id: string;
@@ -19,17 +16,10 @@ export function useAuth() {
   const router = useRouter();
 
   useEffect(() => {
-    // Verificar se existe um token nos cookies
-    const token = Cookies.get('auth-token');
-    if (token) {
-      // Aqui você faria uma chamada para sua API para validar o token
-      // Por enquanto, vamos simular um usuário
-      setUser({
-        id: '1',
-        name: 'Usuário Teste',
-        email: 'teste@email.com',
-        role: 'admin'
-      });
+    // Verificar se existe um usuário no localStorage
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
     }
     setLoading(false);
   }, []);
@@ -37,9 +27,28 @@ export function useAuth() {
   const login = async (email: string, password: string) => {
     try {
       setLoading(true);
-      // TODO: Implement real login
-      setUser({ id: '1', name: 'John Doe', email, role: 'admin' });
-      router.push('/dashboard');
+      
+      // Simulação de autenticação
+      // Em um ambiente real, isso seria uma chamada à API
+      if (email && password) {
+        // Criar um usuário fake
+        const fakeUser = {
+          id: '1',
+          name: 'Usuário Teste',
+          email: email,
+          role: 'admin'
+        };
+        
+        // Salvar no estado e no localStorage
+        setUser(fakeUser);
+        localStorage.setItem('user', JSON.stringify(fakeUser));
+        
+        // Redirecionar para o dashboard
+        router.push('/dashboard');
+        return true;
+      } else {
+        throw new Error('Email e senha são obrigatórios');
+      }
     } catch (error) {
       console.error('Login error:', error);
       throw error;
@@ -49,9 +58,9 @@ export function useAuth() {
   };
 
   const logout = () => {
-    // Remover o cookie
-    Cookies.remove('auth-token');
+    // Remover o usuário do estado e do localStorage
     setUser(null);
+    localStorage.removeItem('user');
     router.push('/login');
   };
 
