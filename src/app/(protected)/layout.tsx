@@ -4,7 +4,6 @@ import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { 
   RiHome4Line, 
-  RiUserLine, 
   RiSettings4Line, 
   RiLogoutBoxLine,
   RiMenuLine,

@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/Card';
 import { 
-  RiUserLine, 
   RiMoneyDollarCircleLine, 
   RiCalendarCheckLine,
   RiArrowUpLine,

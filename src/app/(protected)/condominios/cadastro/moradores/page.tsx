@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { RiUserLine, RiArrowLeftLine, RiAddLine, RiDeleteBinLine, RiCheckLine } from 'react-icons/ri';
 import { CondominioSteps } from '@/components/ui/Steps';
 
@@ -340,7 +341,7 @@ export default function CadastroMoradoresPage() {
                 className="w-10 h-10 flex items-center justify-center bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50"
               >
                 {isSubmitting ? (
-                  <img src="/loading.gif" alt="Carregando..." className="w-6 h-6" />
+                  <Image src="/loading.gif" alt="Carregando..." width={24} height={24} />
                 ) : (
                   <RiCheckLine className="text-xl" />
                 )}

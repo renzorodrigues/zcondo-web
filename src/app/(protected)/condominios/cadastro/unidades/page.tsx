@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { RiBuilding2Line, RiArrowLeftLine, RiAddLine, RiDeleteBinLine, RiHomeLine, RiArrowRightLine } from 'react-icons/ri';
+import { RiArrowLeftLine, RiDeleteBinLine, RiHomeLine, RiArrowRightLine } from 'react-icons/ri';
 import { CondominioSteps } from '@/components/ui/Steps';
 
 interface Unidade {
@@ -329,7 +329,7 @@ export default function CadastroUnidadesPage() {
           </>
         ) : (
           <div className="text-center py-8">
-            <RiBuilding2Line className="mx-auto text-gray-400 text-5xl mb-4" />
+            <RiHomeLine className="mx-auto text-gray-400 text-5xl mb-4" />
             <p className="text-gray-500">Nenhuma unidade cadastrada. Adicione uma unidade para continuar.</p>
           </div>
         )}
