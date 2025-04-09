@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import { RiUserLine, RiArrowLeftLine, RiAddLine, RiDeleteBinLine, RiCheckLine } from 'react-icons/ri';
 import { CondominioSteps } from '@/components/ui/Steps';
 
@@ -14,6 +13,14 @@ interface Morador {
   email: string;
   telefone: string;
   tipo: 'proprietario' | 'inquilino' | 'morador';
+}
+
+interface MoradorDisponivel {
+  id: string;
+  nome: string;
+  cpf: string;
+  email: string;
+  telefone: string;
 }
 
 interface Unidade {
@@ -38,16 +45,14 @@ export default function CadastroMoradoresPage() {
   const [blocos, setBlocos] = useState<Bloco[]>([]);
   const [unidades, setUnidades] = useState<Unidade[]>([]);
   const [moradores, setMoradores] = useState<Morador[]>([]);
+  const [moradoresDisponiveis, setMoradoresDisponiveis] = useState<MoradorDisponivel[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
     unidadeId: '',
-    nome: '',
-    cpf: '',
-    email: '',
-    telefone: '',
     tipo: ''
   });
+  const [moradoresSelecionados, setMoradoresSelecionados] = useState<string[]>([]);
 
   // Carregar dados do localStorage (simulando dados da API)
   useEffect(() => {
@@ -63,8 +68,18 @@ export default function CadastroMoradoresPage() {
       { id: '3', blocoId: '2', numero: '201', andar: 2, tipo: 'apartamento', area: 90.0, vagas: 2 }
     ];
     
+    // Simulando moradores disponíveis para seleção
+    const mockMoradoresDisponiveis: MoradorDisponivel[] = [
+      { id: '1', nome: 'João Silva', cpf: '123.456.789-00', email: 'joao@exemplo.com', telefone: '(11) 98765-4321' },
+      { id: '2', nome: 'Maria Oliveira', cpf: '987.654.321-00', email: 'maria@exemplo.com', telefone: '(11) 91234-5678' },
+      { id: '3', nome: 'Pedro Santos', cpf: '456.789.123-00', email: 'pedro@exemplo.com', telefone: '(11) 94567-8901' },
+      { id: '4', nome: 'Ana Costa', cpf: '789.123.456-00', email: 'ana@exemplo.com', telefone: '(11) 97890-1234' },
+      { id: '5', nome: 'Carlos Ferreira', cpf: '321.654.987-00', email: 'carlos@exemplo.com', telefone: '(11) 92345-6789' }
+    ];
+    
     setBlocos(mockBlocos);
     setUnidades(mockUnidades);
+    setMoradoresDisponiveis(mockMoradoresDisponiveis);
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -72,21 +87,37 @@ export default function CadastroMoradoresPage() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleMoradorSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
+    setMoradoresSelecionados(selectedOptions);
+  };
+
   const handleAddMorador = (e: React.FormEvent) => {
     e.preventDefault();
     
-    const newMorador: Morador = {
-      id: Date.now().toString(),
-      unidadeId: formData.unidadeId,
-      nome: formData.nome,
-      cpf: formData.cpf,
-      email: formData.email,
-      telefone: formData.telefone,
-      tipo: formData.tipo as 'proprietario' | 'inquilino' | 'morador'
-    };
+    if (moradoresSelecionados.length === 0) {
+      alert('Selecione pelo menos um morador');
+      return;
+    }
     
-    setMoradores(prev => [...prev, newMorador]);
-    setFormData({ unidadeId: '', nome: '', cpf: '', email: '', telefone: '', tipo: '' });
+    const novosMoradores: Morador[] = moradoresSelecionados.map(moradorId => {
+      const morador = moradoresDisponiveis.find(m => m.id === moradorId);
+      if (!morador) return null;
+      
+      return {
+        id: Date.now().toString() + moradorId,
+        unidadeId: formData.unidadeId,
+        nome: morador.nome,
+        cpf: morador.cpf,
+        email: morador.email,
+        telefone: morador.telefone,
+        tipo: formData.tipo as 'proprietario' | 'inquilino' | 'morador'
+      };
+    }).filter(Boolean) as Morador[];
+    
+    setMoradores(prev => [...prev, ...novosMoradores]);
+    setFormData({ unidadeId: '', tipo: '' });
+    setMoradoresSelecionados([]);
     setShowForm(false);
   };
 
@@ -161,7 +192,7 @@ export default function CadastroMoradoresPage() {
                   value={formData.unidadeId}
                   onChange={handleChange}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900"
                 >
                   <option value="">Selecione uma unidade</option>
                   {unidades.map(unidade => (
@@ -173,67 +204,25 @@ export default function CadastroMoradoresPage() {
               </div>
               
               <div>
-                <label htmlFor="nome" className="block text-sm font-medium text-gray-700 mb-1">
-                  Nome Completo
+                <label htmlFor="moradores" className="block text-sm font-medium text-gray-700 mb-1">
+                  Moradores
                 </label>
-                <input
-                  type="text"
-                  id="nome"
-                  name="nome"
-                  value={formData.nome}
-                  onChange={handleChange}
+                <select
+                  id="moradores"
+                  name="moradores"
+                  multiple
+                  value={moradoresSelecionados}
+                  onChange={handleMoradorSelect}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  placeholder="Nome do morador"
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="cpf" className="block text-sm font-medium text-gray-700 mb-1">
-                  CPF
-                </label>
-                <input
-                  type="text"
-                  id="cpf"
-                  name="cpf"
-                  value={formData.cpf}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  placeholder="000.000.000-00"
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                  E-mail
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  placeholder="email@exemplo.com"
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="telefone" className="block text-sm font-medium text-gray-700 mb-1">
-                  Telefone
-                </label>
-                <input
-                  type="tel"
-                  id="telefone"
-                  name="telefone"
-                  value={formData.telefone}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  placeholder="(00) 00000-0000"
-                />
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 min-h-[120px] text-gray-900"
+                >
+                  {moradoresDisponiveis.map(morador => (
+                    <option key={morador.id} value={morador.id}>
+                      {morador.nome} - {morador.cpf}
+                    </option>
+                  ))}
+                </select>
+                <p className="mt-1 text-xs text-gray-500">Pressione Ctrl (ou Cmd) para selecionar múltiplos moradores</p>
               </div>
               
               <div>
@@ -246,7 +235,7 @@ export default function CadastroMoradoresPage() {
                   value={formData.tipo}
                   onChange={handleChange}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900"
                 >
                   <option value="">Selecione um tipo</option>
                   <option value="proprietario">Proprietário</option>
@@ -259,7 +248,7 @@ export default function CadastroMoradoresPage() {
             <div className="flex justify-end mt-4">
               <button
                 type="submit"
-                className="w-10 h-10 flex items-center justify-center bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+                className="w-10 h-10 flex items-center justify-center bg-purple-600 text-white rounded-full hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
               >
                 <RiAddLine className="text-xl" />
               </button>
@@ -334,14 +323,21 @@ export default function CadastroMoradoresPage() {
               </div>
             </div>
             
-            <div className="flex justify-end pt-4">
+            <div className="flex justify-between pt-4">
+              <button
+                type="button"
+                onClick={() => router.back()}
+                className="flex items-center justify-center w-10 h-10 bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+              >
+                <RiArrowLeftLine className="text-xl" />
+              </button>
               <button
                 onClick={handleSubmit}
                 disabled={isSubmitting}
-                className="w-10 h-10 flex items-center justify-center bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50"
+                className="flex items-center justify-center w-10 h-10 bg-purple-600 text-white rounded-full hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50"
               >
                 {isSubmitting ? (
-                  <Image src="/loading.gif" alt="Carregando..." width={24} height={24} />
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 ) : (
                   <RiCheckLine className="text-xl" />
                 )}

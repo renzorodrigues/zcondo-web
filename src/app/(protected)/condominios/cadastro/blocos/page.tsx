@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { RiBuilding4Line, RiArrowLeftLine, RiDeleteBinLine, RiArrowRightLine } from 'react-icons/ri';
+import { RiBuilding2Line, RiArrowLeftLine, RiAddLine, RiDeleteBinLine, RiArrowRightLine } from 'react-icons/ri';
 import { CondominioSteps } from '@/components/ui/Steps';
 
 interface Bloco {
@@ -15,6 +15,7 @@ interface Bloco {
 export default function CadastroBlocosPage() {
   const router = useRouter();
   const [blocos, setBlocos] = useState<Bloco[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
     nome: '',
@@ -46,6 +47,26 @@ export default function CadastroBlocosPage() {
     setBlocos(prev => prev.filter(bloco => bloco.id !== id));
   };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    
+    try {
+      // TODO: Implementar a chamada à API para salvar os blocos
+      console.log('Dados dos blocos:', blocos);
+      
+      // Simular um delay para mostrar o loading
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Redirecionar para a página de cadastro de unidades
+      router.push('/condominios/cadastro/unidades');
+    } catch (error) {
+      console.error('Erro ao cadastrar blocos:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="max-w-4xl mx-auto p-6">
       <div className="flex items-center mb-6">
@@ -67,7 +88,7 @@ export default function CadastroBlocosPage() {
             onClick={() => setShowForm(!showForm)}
             className="flex items-center justify-center px-3 py-1.5 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 text-sm"
           >
-            <RiBuilding4Line className="mr-1.5 text-lg" />
+            <RiBuilding2Line className="mr-1.5 text-lg" />
             {showForm ? 'Cancelar' : 'Adicionar Bloco'}
           </button>
         </div>
@@ -129,9 +150,9 @@ export default function CadastroBlocosPage() {
             <div className="flex justify-end mt-4">
               <button
                 type="submit"
-                className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+                className="flex items-center justify-center w-10 h-10 bg-purple-600 text-white rounded-full hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
               >
-                Adicionar
+                <RiAddLine className="text-xl" />
               </button>
             </div>
           </form>
@@ -201,16 +222,21 @@ export default function CadastroBlocosPage() {
                 <RiArrowLeftLine className="text-xl" />
               </button>
               <button
-                type="submit"
+                onClick={handleSubmit}
+                disabled={isSubmitting}
                 className="flex items-center justify-center w-10 h-10 bg-purple-600 text-white rounded-full hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50"
               >
-                <RiArrowRightLine className="text-xl" />
+                {isSubmitting ? (
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <RiArrowRightLine className="text-xl" />
+                )}
               </button>
             </div>
           </>
         ) : (
           <div className="text-center py-8">
-            <RiBuilding4Line className="mx-auto text-gray-400 text-5xl mb-4" />
+            <RiBuilding2Line className="mx-auto text-gray-400 text-5xl mb-4" />
             <p className="text-gray-500">Nenhum bloco cadastrado. Adicione um bloco para continuar.</p>
           </div>
         )}

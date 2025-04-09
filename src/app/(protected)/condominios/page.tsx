@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { RiEditLine, RiDeleteBinLine, RiBuilding2Line } from 'react-icons/ri';
+import { RiBuilding2Line, RiArrowLeftLine, RiDeleteBinLine } from 'react-icons/ri';
 
 interface Condominio {
   id: number;
@@ -158,7 +158,7 @@ export default function CondominiosPage() {
                         onClick={() => handleEditCondominio(condominio.id)}
                         className="text-indigo-600 hover:text-indigo-900"
                       >
-                        <RiEditLine className="text-xl" />
+                        <RiArrowLeftLine className="text-xl" />
                       </button>
                       <button
                         onClick={() => handleDeleteCondominio(condominio.id)}

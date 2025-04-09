@@ -10,7 +10,8 @@ import {
   RiBuilding2Line,
   RiUserSettingsLine,
   RiLockPasswordLine,
-  RiGroupLine
+  RiGroupLine,
+  RiMoneyDollarCircleLine,
 } from 'react-icons/ri';
 import { FaChevronDown } from 'react-icons/fa';
 import Link from 'next/link';
@@ -261,6 +262,18 @@ export default function ProtectedLayout({
               >
                 <RiGroupLine className="mr-3" />
                 {isSidebarOpen && <span>Moradores</span>}
+              </Link>
+
+              <Link 
+                href="/financeiro" 
+                className={`flex items-center p-2 rounded-md ${
+                  pathname.startsWith('/financeiro')
+                    ? 'bg-purple-50 text-purple-700' 
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                <RiMoneyDollarCircleLine className="mr-3" />
+                {isSidebarOpen && <span>Financeiro</span>}
               </Link>
               
               <Link 

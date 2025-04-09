@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { RiArrowLeftLine, RiDeleteBinLine, RiHomeLine, RiArrowRightLine } from 'react-icons/ri';
+import { RiBuilding2Line, RiArrowLeftLine, RiAddLine, RiDeleteBinLine, RiHomeLine, RiArrowRightLine } from 'react-icons/ri';
 import { CondominioSteps } from '@/components/ui/Steps';
 
 interface Unidade {
@@ -138,7 +138,7 @@ export default function CadastroUnidadesPage() {
                   value={formData.blocoId}
                   onChange={handleChange}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900"
                 >
                   <option value="">Selecione um bloco</option>
                   {blocos.map(bloco => (
@@ -192,7 +192,7 @@ export default function CadastroUnidadesPage() {
                   value={formData.tipo}
                   onChange={handleChange}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900"
                 >
                   <option value="">Selecione um tipo</option>
                   <option value="apartamento">Apartamento</option>
@@ -241,9 +241,9 @@ export default function CadastroUnidadesPage() {
             <div className="flex justify-end mt-4">
               <button
                 type="submit"
-                className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+                className="flex items-center justify-center w-10 h-10 bg-purple-600 text-white rounded-full hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
               >
-                Adicionar
+                <RiAddLine className="text-xl" />
               </button>
             </div>
           </form>
@@ -316,20 +316,30 @@ export default function CadastroUnidadesPage() {
               </div>
             </div>
             
-            <div className="flex justify-end pt-4">
+            <div className="flex justify-between pt-4">
+              <button
+                type="button"
+                onClick={() => router.back()}
+                className="flex items-center justify-center w-10 h-10 bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+              >
+                <RiArrowLeftLine className="text-xl" />
+              </button>
               <button
                 onClick={handleSubmit}
                 disabled={isSubmitting}
-                className="flex items-center justify-center px-3 py-1.5 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50 text-sm"
+                className="flex items-center justify-center w-10 h-10 bg-purple-600 text-white rounded-full hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50"
               >
-                <RiArrowRightLine className="mr-1.5 text-lg" />
-                {isSubmitting ? 'Salvando...' : 'Próximo: Vincular Moradores'}
+                {isSubmitting ? (
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <RiArrowRightLine className="text-xl" />
+                )}
               </button>
             </div>
           </>
         ) : (
           <div className="text-center py-8">
-            <RiHomeLine className="mx-auto text-gray-400 text-5xl mb-4" />
+            <RiBuilding2Line className="mx-auto text-gray-400 text-5xl mb-4" />
             <p className="text-gray-500">Nenhuma unidade cadastrada. Adicione uma unidade para continuar.</p>
           </div>
         )}

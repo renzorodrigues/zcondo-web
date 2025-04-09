@@ -192,7 +192,7 @@ export default function ResidentRegistrationPage() {
                 name="role"
                 value={formData.role}
                 onChange={handleChange}
-                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-2 px-3 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-2 px-3 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm text-gray-900"
               >
                 <option value="Morador">Morador</option>
                 <option value="Síndico">Síndico</option>
@@ -212,7 +212,7 @@ export default function ResidentRegistrationPage() {
                   onClick={() => setFormData(prev => ({ ...prev, status: prev.status === 'Ativo' ? 'Inativo' : 'Ativo' }))}
                   className={`${
                     formData.status === 'Ativo' ? 'bg-green-400' : 'bg-gray-300'
-                  } relative inline-flex h-5 w-10 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2`}
+                  } relative inline-flex h-5 w-10 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 p-0.5`}
                   role="switch"
                   aria-checked={formData.status === 'Ativo'}
                 >
@@ -220,7 +220,7 @@ export default function ResidentRegistrationPage() {
                     aria-hidden="true"
                     className={`${
                       formData.status === 'Ativo' ? 'translate-x-5' : 'translate-x-0'
-                    } pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out flex items-center justify-center`}
+                    } pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out flex items-center justify-center absolute top-0.5 left-0.5`}
                   >
                     {formData.status === 'Ativo' ? (
                       <span className="h-2 w-2 rounded-full bg-green-400"></span>
@@ -263,7 +263,7 @@ export default function ResidentRegistrationPage() {
                 name="residentType"
                 value={formData.residentType}
                 onChange={handleChange}
-                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-2 px-3 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-2 px-3 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm text-gray-900"
               >
                 <option value="Proprietário">Proprietário</option>
                 <option value="Inquilino">Inquilino</option>

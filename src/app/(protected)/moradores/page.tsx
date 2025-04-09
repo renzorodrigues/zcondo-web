@@ -94,15 +94,19 @@ export default function ResidentsPage() {
       }
     } else {
       // Caso contrário, mostre um subconjunto com a página atual no meio
-      let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-      const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+      const startPage = Math.max(1, currentPage - 2);
+      const endPage = Math.min(totalPages, currentPage + 2);
       
       if (endPage - startPage + 1 < maxVisiblePages) {
-        startPage = Math.max(1, endPage - maxVisiblePages + 1);
-      }
-      
-      for (let i = startPage; i <= endPage; i++) {
-        pageNumbers.push(i);
+        // Ajuste o startPage se necessário
+        const adjustedStartPage = Math.max(1, endPage - maxVisiblePages + 1);
+        for (let i = adjustedStartPage; i <= endPage; i++) {
+          pageNumbers.push(i);
+        }
+      } else {
+        for (let i = startPage; i <= endPage; i++) {
+          pageNumbers.push(i);
+        }
       }
     }
     
@@ -270,7 +274,7 @@ export default function ResidentsPage() {
                     id="items-per-page"
                     value={itemsPerPage}
                     onChange={handleItemsPerPageChange}
-                    className="block w-20 pl-2 pr-6 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 text-gray-700"
+                    className="block w-20 pl-2 pr-6 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 text-gray-900"
                   >
                     {itemsPerPageOptions.map(option => (
                       <option key={option} value={option}>
