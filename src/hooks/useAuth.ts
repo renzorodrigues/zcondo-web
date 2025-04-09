@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Cookies from 'js-cookie';
 
 interface User {
   id: string;
@@ -16,10 +17,18 @@ export function useAuth() {
   const router = useRouter();
 
   useEffect(() => {
-    // Verificar se existe um usuário no localStorage
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+    // Verificar se existe um token nos cookies
+    const token = Cookies.get('auth-token');
+    if (token) {
+      try {
+        // Tentar obter o usuário do localStorage
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          setUser(JSON.parse(storedUser));
+        }
+      } catch (error) {
+        console.error('Error parsing user data:', error);
+      }
     }
     setLoading(false);
   }, []);
@@ -43,8 +52,11 @@ export function useAuth() {
         setUser(fakeUser);
         localStorage.setItem('user', JSON.stringify(fakeUser));
         
-        // Usar window.location.href para garantir o redirecionamento
-        window.location.href = '/dashboard';
+        // Adicionar um cookie de autenticação
+        Cookies.set('auth-token', 'fake-token', { expires: 7 }); // Expira em 7 dias
+        
+        // Redirecionar para o dashboard
+        router.push('/dashboard');
         return true;
       } else {
         throw new Error('Email e senha são obrigatórios');
@@ -61,8 +73,12 @@ export function useAuth() {
     // Remover o usuário do estado e do localStorage
     setUser(null);
     localStorage.removeItem('user');
-    // Usar window.location.href para garantir o redirecionamento
-    window.location.href = '/login';
+    
+    // Remover o cookie de autenticação
+    Cookies.remove('auth-token');
+    
+    // Redirecionar para o login
+    router.push('/login');
   };
 
   return {
