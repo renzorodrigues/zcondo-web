@@ -20,7 +20,7 @@ export default function LoginPage() {
     setError('');
     
     try {
-      await login(email);
+      await login(email, password);
     } catch {
       setError('Credenciais inválidas');
     } finally {

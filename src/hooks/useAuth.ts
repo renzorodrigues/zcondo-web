@@ -34,22 +34,11 @@ export function useAuth() {
     setLoading(false);
   }, []);
 
-  const login = async (email: string) => {
+  const login = async (email: string, password: string) => {
     try {
       setLoading(true);
-      // In a real app, you would call your API here
-      // const response = await api.post('/auth/login', { email, password });
-      
-      // For demo purposes, we'll just simulate a successful login
-      const mockUser = {
-        id: '1',
-        name: 'Demo User',
-        email: email,
-        role: 'admin',
-      };
-      
-      setUser(mockUser);
-      localStorage.setItem('user', JSON.stringify(mockUser));
+      // TODO: Implement real login
+      setUser({ id: '1', name: 'John Doe', email, role: 'admin' });
       router.push('/dashboard');
     } catch (error) {
       console.error('Login error:', error);
