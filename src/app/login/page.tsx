@@ -20,13 +20,9 @@ export default function LoginPage() {
     setError('');
     
     try {
-      const success = await login(email, password);
-      if (!success) {
-        setError('Credenciais inválidas');
-      }
+      await login(email);
     } catch (error) {
-      console.error('Erro no login:', error);
-      setError('Erro ao fazer login');
+      setError('Credenciais inválidas');
     } finally {
       setIsLoading(false);
     }
