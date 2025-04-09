@@ -1,11 +1,15 @@
+'use client';
+
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
+import { api } from '@/services/api';
 
 interface User {
   id: string;
   name: string;
   email: string;
+  role: string;
 }
 
 export function useAuth() {
@@ -22,7 +26,8 @@ export function useAuth() {
       setUser({
         id: '1',
         name: 'Usuário Teste',
-        email: 'teste@email.com'
+        email: 'teste@email.com',
+        role: 'admin'
       });
     }
     setLoading(false);
@@ -30,25 +35,26 @@ export function useAuth() {
 
   const login = async (email: string, password: string) => {
     try {
-      // Aqui você faria uma chamada para sua API de login
-      // Por enquanto, vamos simular um login bem-sucedido
+      setLoading(true);
+      // In a real app, you would call your API here
+      // const response = await api.post('/auth/login', { email, password });
+      
+      // For demo purposes, we'll just simulate a successful login
       const mockUser = {
         id: '1',
-        name: 'Usuário Teste',
-        email: email
+        name: 'Demo User',
+        email: email,
+        role: 'admin',
       };
-
-      // Simular token
-      const token = 'mock-token-' + Date.now();
-      // Usar cookies em vez de localStorage
-      Cookies.set('auth-token', token, { expires: 7 }); // Expira em 7 dias
       
       setUser(mockUser);
+      localStorage.setItem('user', JSON.stringify(mockUser));
       router.push('/dashboard');
-      return true;
     } catch (error) {
-      console.error('Erro no login:', error);
-      return false;
+      console.error('Login failed:', error);
+      throw error;
+    } finally {
+      setLoading(false);
     }
   };
 

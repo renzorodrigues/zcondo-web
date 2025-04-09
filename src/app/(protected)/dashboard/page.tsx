@@ -3,14 +3,13 @@
 import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/Card';
 import { 
-  RiBuilding2Line, 
-  RiGroupLine, 
+  RiUserLine, 
   RiMoneyDollarCircleLine, 
-  RiCalendarCheckLine, 
-  RiFileList3Line, 
-  RiNotification3Line,
+  RiCalendarCheckLine,
   RiArrowUpLine,
-  RiArrowDownLine
+  RiArrowDownLine,
+  RiNotification3Line,
+  RiFileList3Line
 } from 'react-icons/ri';
 
 interface Notification {
@@ -215,7 +214,7 @@ export default function DashboardPage() {
                 </div>
               </div>
               <div className="ml-auto">
-                <RiGroupLine className="h-12 w-12 text-purple-600" />
+                <RiUserLine className="h-12 w-12 text-purple-600" />
               </div>
             </div>
           </div>
