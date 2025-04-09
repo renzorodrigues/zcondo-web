@@ -21,7 +21,7 @@ export default function LoginPage() {
     
     try {
       await login(email);
-    } catch (error) {
+    } catch {
       setError('Credenciais inválidas');
     } finally {
       setIsLoading(false);
