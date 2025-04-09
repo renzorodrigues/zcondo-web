@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { RiArrowLeftLine } from 'react-icons/ri';
+import { RiArrowLeftLine, RiArrowRightLine } from 'react-icons/ri';
 import { CondominioSteps } from '@/components/ui/Steps';
 
 export default function CadastroCondominioPage() {
@@ -195,9 +195,13 @@ export default function CadastroCondominioPage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50"
+              className="flex items-center justify-center w-10 h-10 bg-purple-600 text-white rounded-full hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50"
             >
-              {isSubmitting ? 'Salvando...' : 'Próximo: Cadastrar Blocos'}
+              {isSubmitting ? (
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <RiArrowRightLine className="text-xl" />
+              )}
             </button>
           </div>
         </form>

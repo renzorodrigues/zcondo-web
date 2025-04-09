@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { RiBuilding2Line, RiArrowLeftLine, RiAddLine, RiDeleteBinLine } from 'react-icons/ri';
+import { RiBuilding2Line, RiArrowLeftLine, RiAddLine, RiDeleteBinLine, RiHomeLine, RiArrowRightLine } from 'react-icons/ri';
 import { CondominioSteps } from '@/components/ui/Steps';
 
 interface Unidade {
@@ -118,9 +118,9 @@ export default function CadastroUnidadesPage() {
         <div className="mb-6">
           <button
             onClick={() => setShowForm(!showForm)}
-            className="flex items-center px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+            className="flex items-center justify-center px-3 py-1.5 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 text-sm"
           >
-            <RiAddLine className="mr-2" />
+            <RiHomeLine className="mr-1.5 text-lg" />
             {showForm ? 'Cancelar' : 'Adicionar Unidade'}
           </button>
         </div>
@@ -320,8 +320,9 @@ export default function CadastroUnidadesPage() {
               <button
                 onClick={handleSubmit}
                 disabled={isSubmitting}
-                className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50"
+                className="flex items-center justify-center px-3 py-1.5 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50 text-sm"
               >
+                <RiArrowRightLine className="mr-1.5 text-lg" />
                 {isSubmitting ? 'Salvando...' : 'Próximo: Vincular Moradores'}
               </button>
             </div>

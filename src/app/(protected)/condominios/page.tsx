@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { RiAddLine, RiEditLine, RiDeleteBinLine } from 'react-icons/ri';
+import { RiAddLine, RiEditLine, RiDeleteBinLine, RiBuilding2Line } from 'react-icons/ri';
 
 interface Condominio {
   id: number;
@@ -101,9 +101,9 @@ export default function CondominiosPage() {
         <h1 className="text-2xl font-bold text-gray-800">Condomínios</h1>
         <button
           onClick={handleAddCondominio}
-          className="flex items-center px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+          className="flex items-center justify-center px-3 py-1.5 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 text-sm"
         >
-          <RiAddLine className="mr-2" />
+          <RiBuilding2Line className="mr-1.5 text-lg" />
           Novo Condomínio
         </button>
       </div>

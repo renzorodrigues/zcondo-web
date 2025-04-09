@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { 
   RiHome4Line, 
@@ -10,7 +10,8 @@ import {
   RiMenuLine,
   RiBuilding2Line,
   RiUserSettingsLine,
-  RiLockPasswordLine
+  RiLockPasswordLine,
+  RiGroupLine
 } from 'react-icons/ri';
 import { FaChevronDown } from 'react-icons/fa';
 import Link from 'next/link';
@@ -36,6 +37,10 @@ export default function ProtectedLayout({
   const [isCondominiumDropdownOpen, setIsCondominiumDropdownOpen] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const isDashboard = pathname === '/dashboard';
+  
+  // Refs para os dropdowns
+  const condominiumDropdownRef = useRef<HTMLDivElement>(null);
+  const userDropdownRef = useRef<HTMLDivElement>(null);
 
   // Get username from email (part before @)
   const username = user?.email ? user.email.split('@')[0] : '';
@@ -54,6 +59,37 @@ export default function ProtectedLayout({
       }
     }
   }, []);
+
+  // Handle clicks outside of dropdowns
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      // Close condominium dropdown if click is outside
+      if (
+        isCondominiumDropdownOpen && 
+        condominiumDropdownRef.current && 
+        !condominiumDropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsCondominiumDropdownOpen(false);
+      }
+      
+      // Close user dropdown if click is outside
+      if (
+        isUserDropdownOpen && 
+        userDropdownRef.current && 
+        !userDropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsUserDropdownOpen(false);
+      }
+    };
+
+    // Add event listener
+    document.addEventListener('mousedown', handleClickOutside);
+    
+    // Clean up
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isCondominiumDropdownOpen, isUserDropdownOpen]);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -90,7 +126,7 @@ export default function ProtectedLayout({
             {/* Center - Condominium Selector */}
             <div className="flex items-center justify-center">
               {isDashboard && (
-                <div className="relative">
+                <div className="relative" ref={condominiumDropdownRef}>
                   <button 
                     onClick={toggleCondominiumDropdown}
                     className="flex items-center space-x-2 px-3 py-2 rounded-md bg-purple-50 hover:bg-purple-100 transition-colors"
@@ -101,7 +137,7 @@ export default function ProtectedLayout({
                   </button>
                   
                   {isCondominiumDropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
+                    <div className="absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white z-10">
                       <div className="py-1" role="menu" aria-orientation="vertical">
                         {mockCondominiums.map((condominium) => (
                           <button
@@ -128,10 +164,10 @@ export default function ProtectedLayout({
         </div>
         
         {/* User Menu - With 30px margin from the right edge */}
-        <div className="absolute right-[30px] top-0 h-16 flex items-center">
+        <div className="absolute right-[30px] top-0 h-16 flex items-center" ref={userDropdownRef}>
           <button 
             onClick={toggleUserDropdown}
-            className="flex items-center justify-center w-10 h-10 rounded-full bg-purple-100 text-purple-700 font-medium hover:bg-purple-200 transition-colors"
+            className="flex items-center justify-center w-10 h-10 rounded-full bg-purple-100 text-purple-700 font-medium hover:bg-purple-200 transition-colors text-center"
           >
             {initials}
           </button>
@@ -145,7 +181,7 @@ export default function ProtectedLayout({
                 </div>
                 
                 <Link 
-                  href="/profile" 
+                  href="/configuracoes/perfil" 
                   className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                   role="menuitem"
                 >
@@ -217,14 +253,14 @@ export default function ProtectedLayout({
               </Link>
               
               <Link 
-                href="/residents" 
+                href="/moradores" 
                 className={`flex items-center p-2 rounded-md ${
-                  pathname === '/residents' 
+                  pathname === '/moradores' 
                     ? 'bg-purple-50 text-purple-700' 
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
-                <RiUserLine className="mr-3" />
+                <RiGroupLine className="mr-3" />
                 {isSidebarOpen && <span>Moradores</span>}
               </Link>
               

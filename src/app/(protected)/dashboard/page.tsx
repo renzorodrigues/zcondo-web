@@ -9,7 +9,8 @@ import {
   RiArrowUpLine,
   RiArrowDownLine,
   RiNotification3Line,
-  RiFileList3Line
+  RiFileList3Line,
+  RiGroupLine
 } from 'react-icons/ri';
 
 interface Notification {
@@ -214,7 +215,7 @@ export default function DashboardPage() {
                 </div>
               </div>
               <div className="ml-auto">
-                <RiUserLine className="h-12 w-12 text-purple-600" />
+                <RiGroupLine className="h-12 w-12 text-purple-600" />
               </div>
             </div>
           </div>

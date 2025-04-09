@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { RiBuilding2Line, RiHomeLine, RiUserLine } from 'react-icons/ri';
+import { RiBuilding2Line, RiBuilding4Line, RiHomeLine, RiUserLine } from 'react-icons/ri';
 
 interface Step {
   id: string;
@@ -76,7 +76,7 @@ export function CondominioSteps({ currentStep }: { currentStep: string }) {
       id: 'blocos',
       title: 'Blocos',
       description: 'Cadastro de blocos',
-      icon: <RiHomeLine className="text-xl" />
+      icon: <RiBuilding4Line className="text-xl" />
     },
     {
       id: 'unidades',

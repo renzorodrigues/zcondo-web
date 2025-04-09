@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { RiUserLine, RiArrowLeftLine, RiAddLine, RiDeleteBinLine } from 'react-icons/ri';
+import { RiUserLine, RiArrowLeftLine, RiAddLine, RiDeleteBinLine, RiCheckLine } from 'react-icons/ri';
 import { CondominioSteps } from '@/components/ui/Steps';
 
 interface Morador {
@@ -140,9 +140,9 @@ export default function CadastroMoradoresPage() {
         <div className="mb-6">
           <button
             onClick={() => setShowForm(!showForm)}
-            className="flex items-center px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+            className="flex items-center justify-center px-3 py-1.5 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 text-sm"
           >
-            <RiAddLine className="mr-2" />
+            <RiUserLine className="mr-1.5 text-lg" />
             {showForm ? 'Cancelar' : 'Adicionar Morador'}
           </button>
         </div>
@@ -258,9 +258,9 @@ export default function CadastroMoradoresPage() {
             <div className="flex justify-end mt-4">
               <button
                 type="submit"
-                className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+                className="w-10 h-10 flex items-center justify-center bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
               >
-                Adicionar
+                <RiAddLine className="text-xl" />
               </button>
             </div>
           </form>
@@ -337,9 +337,13 @@ export default function CadastroMoradoresPage() {
               <button
                 onClick={handleSubmit}
                 disabled={isSubmitting}
-                className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50"
+                className="w-10 h-10 flex items-center justify-center bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50"
               >
-                {isSubmitting ? 'Finalizando...' : 'Finalizar Cadastro'}
+                {isSubmitting ? (
+                  <img src="/loading.gif" alt="Carregando..." className="w-6 h-6" />
+                ) : (
+                  <RiCheckLine className="text-xl" />
+                )}
               </button>
             </div>
           </>
