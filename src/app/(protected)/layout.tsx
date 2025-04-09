@@ -15,6 +15,8 @@ export default function ProtectedLayout({
   const pathname = usePathname();
   const isDashboard = pathname === '/dashboard';
 
+  console.log('Current pathname:', pathname); // Temporary log to debug
+
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow-sm">
@@ -25,7 +27,7 @@ export default function ProtectedLayout({
             </div>
             
             <div className="flex items-center space-x-4">
-              {isDashboard && (
+              {pathname === '/dashboard' && (
                 <Card className="p-2">
                   <select 
                     className="bg-transparent border-none focus:outline-none focus:ring-0 text-sm"
