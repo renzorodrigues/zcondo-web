@@ -43,8 +43,8 @@ export function useAuth() {
         setUser(fakeUser);
         localStorage.setItem('user', JSON.stringify(fakeUser));
         
-        // Redirecionar para o dashboard
-        router.push('/dashboard');
+        // Usar window.location.href para garantir o redirecionamento
+        window.location.href = '/dashboard';
         return true;
       } else {
         throw new Error('Email e senha são obrigatórios');
@@ -61,7 +61,8 @@ export function useAuth() {
     // Remover o usuário do estado e do localStorage
     setUser(null);
     localStorage.removeItem('user');
-    router.push('/login');
+    // Usar window.location.href para garantir o redirecionamento
+    window.location.href = '/login';
   };
 
   return {
