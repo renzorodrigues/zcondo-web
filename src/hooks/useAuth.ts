@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
-import { api } from '@/services/api';
+// Removendo a importação não utilizada
+// import { api } from '@/services/api';
 
 interface User {
   id: string;
@@ -33,7 +34,7 @@ export function useAuth() {
     setLoading(false);
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string) => {
     try {
       setLoading(true);
       // In a real app, you would call your API here
@@ -51,7 +52,7 @@ export function useAuth() {
       localStorage.setItem('user', JSON.stringify(mockUser));
       router.push('/dashboard');
     } catch (error) {
-      console.error('Login failed:', error);
+      console.error('Login error:', error);
       throw error;
     } finally {
       setLoading(false);
