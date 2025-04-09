@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { RiBuilding2Line, RiArrowLeftLine } from 'react-icons/ri';
+import { RiArrowLeftLine } from 'react-icons/ri';
 import { CondominioSteps } from '@/components/ui/Steps';
 
 export default function CadastroCondominioPage() {

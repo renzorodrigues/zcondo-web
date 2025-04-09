@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { RiBuilding2Line, RiAddLine, RiEditLine, RiDeleteBinLine } from 'react-icons/ri';
+import { RiAddLine, RiEditLine, RiDeleteBinLine } from 'react-icons/ri';
 
 interface Condominio {
   id: number;
