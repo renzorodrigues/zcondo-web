@@ -1,23 +1,32 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { RiGroupLine, RiSearchLine, RiEditLine, RiDeleteBinLine, RiArrowLeftSLine, RiArrowRightSLine } from 'react-icons/ri';
+import { RiGroupLine, RiSearchLine, RiEditLine, RiDeleteBinLine, RiArrowLeftSLine, RiArrowRightSLine, RiBuilding2Line } from 'react-icons/ri';
+import { FaChevronDown } from 'react-icons/fa';
+
+// Mock data para condomínios - em uma aplicação real, isso viria de uma API
+const mockCondominiums = [
+  { id: 1, name: 'Residencial Parque Verde' },
+  { id: 2, name: 'Edifício Central' },
+  { id: 3, name: 'Condomínio Solar' },
+  { id: 4, name: 'Residencial Horizonte' }
+];
 
 // Mock data para moradores - em uma aplicação real, isso viria de uma API
 const mockUsers = [
-  { id: 1, name: 'João Silva', email: 'joao.silva@example.com', role: 'Morador', status: 'Ativo', residentType: 'Proprietário' },
-  { id: 2, name: 'Maria Oliveira', email: 'maria.oliveira@example.com', role: 'Síndico', status: 'Ativo', residentType: 'Proprietário' },
-  { id: 3, name: 'Carlos Santos', email: 'carlos.santos@example.com', role: 'Morador', status: 'Inativo', residentType: 'Inquilino' },
-  { id: 4, name: 'Ana Pereira', email: 'ana.pereira@example.com', role: 'Administrador', status: 'Ativo', residentType: 'Proprietário' },
-  { id: 5, name: 'Pedro Oliveira', email: 'pedro.oliveira@example.com', role: 'Morador', status: 'Ativo', residentType: 'Inquilino' },
-  { id: 6, name: 'Juliana Costa', email: 'juliana.costa@example.com', role: 'Morador', status: 'Ativo', residentType: 'Proprietário' },
-  { id: 7, name: 'Roberto Almeida', email: 'roberto.almeida@example.com', role: 'Morador', status: 'Inativo', residentType: 'Inquilino' },
-  { id: 8, name: 'Fernanda Lima', email: 'fernanda.lima@example.com', role: 'Morador', status: 'Ativo', residentType: 'Proprietário' },
-  { id: 9, name: 'Lucas Mendes', email: 'lucas.mendes@example.com', role: 'Morador', status: 'Ativo', residentType: 'Inquilino' },
-  { id: 10, name: 'Carla Souza', email: 'carla.souza@example.com', role: 'Morador', status: 'Ativo', residentType: 'Proprietário' },
-  { id: 11, name: 'Ricardo Ferreira', email: 'ricardo.ferreira@example.com', role: 'Morador', status: 'Ativo', residentType: 'Inquilino' },
-  { id: 12, name: 'Patrícia Santos', email: 'patricia.santos@example.com', role: 'Morador', status: 'Inativo', residentType: 'Proprietário' },
+  { id: 1, condominiumId: 1, name: 'João Silva', email: 'joao.silva@example.com', role: 'Morador', status: 'Ativo', residentType: 'Proprietário' },
+  { id: 2, condominiumId: 1, name: 'Maria Oliveira', email: 'maria.oliveira@example.com', role: 'Síndico', status: 'Ativo', residentType: 'Proprietário' },
+  { id: 3, condominiumId: 2, name: 'Carlos Santos', email: 'carlos.santos@example.com', role: 'Morador', status: 'Inativo', residentType: 'Inquilino' },
+  { id: 4, condominiumId: 2, name: 'Ana Pereira', email: 'ana.pereira@example.com', role: 'Administrador', status: 'Ativo', residentType: 'Proprietário' },
+  { id: 5, condominiumId: 3, name: 'Pedro Oliveira', email: 'pedro.oliveira@example.com', role: 'Morador', status: 'Ativo', residentType: 'Inquilino' },
+  { id: 6, condominiumId: 3, name: 'Juliana Costa', email: 'juliana.costa@example.com', role: 'Morador', status: 'Ativo', residentType: 'Proprietário' },
+  { id: 7, condominiumId: 4, name: 'Roberto Almeida', email: 'roberto.almeida@example.com', role: 'Morador', status: 'Inativo', residentType: 'Inquilino' },
+  { id: 8, condominiumId: 4, name: 'Fernanda Lima', email: 'fernanda.lima@example.com', role: 'Morador', status: 'Ativo', residentType: 'Proprietário' },
+  { id: 9, condominiumId: 1, name: 'Lucas Mendes', email: 'lucas.mendes@example.com', role: 'Morador', status: 'Ativo', residentType: 'Inquilino' },
+  { id: 10, condominiumId: 2, name: 'Carla Souza', email: 'carla.souza@example.com', role: 'Morador', status: 'Ativo', residentType: 'Proprietário' },
+  { id: 11, condominiumId: 3, name: 'Ricardo Ferreira', email: 'ricardo.ferreira@example.com', role: 'Morador', status: 'Ativo', residentType: 'Inquilino' },
+  { id: 12, condominiumId: 4, name: 'Patrícia Santos', email: 'patricia.santos@example.com', role: 'Morador', status: 'Inativo', residentType: 'Proprietário' },
 ];
 
 export default function ResidentsPage() {
@@ -27,33 +36,76 @@ export default function ResidentsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
   const [totalPages, setTotalPages] = useState(Math.ceil(mockUsers.length / 5));
+  const [selectedCondominium, setSelectedCondominium] = useState(mockCondominiums[0]);
+  const [isCondominiumDropdownOpen, setIsCondominiumDropdownOpen] = useState(false);
+  const condominiumDropdownRef = useRef<HTMLDivElement>(null);
   
   // Opções para o select de itens por página
   const itemsPerPageOptions = [5, 10, 25, 50];
 
-  // Filtrar moradores quando o termo de busca mudar
+  // Load selected condominium from localStorage on mount
   useEffect(() => {
-    if (searchTerm.trim() === '') {
-      setFilteredUsers(users);
-    } else {
-      const filtered = users.filter(user => 
+    const storedId = localStorage.getItem('selectedCondominiumId');
+    if (storedId) {
+      const id = parseInt(storedId, 10);
+      const condominium = mockCondominiums.find(c => c.id === id);
+      if (condominium) {
+        setSelectedCondominium(condominium);
+      }
+    }
+  }, []);
+
+  // Handle clicks outside of dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        isCondominiumDropdownOpen && 
+        condominiumDropdownRef.current && 
+        !condominiumDropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsCondominiumDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isCondominiumDropdownOpen]);
+
+  const toggleCondominiumDropdown = () => {
+    setIsCondominiumDropdownOpen(!isCondominiumDropdownOpen);
+  };
+
+  const handleCondominiumSelect = (condominium: typeof mockCondominiums[0]) => {
+    setSelectedCondominium(condominium);
+    setIsCondominiumDropdownOpen(false);
+    setCurrentPage(1); // Reset to first page when changing condominium
+  };
+
+  // Filtrar moradores quando o termo de busca ou condomínio selecionado mudar
+  useEffect(() => {
+    let filtered = users;
+    
+    // Filter by condominium
+    if (selectedCondominium.id !== 0) { // 0 represents "Todos os condomínios"
+      filtered = filtered.filter(user => user.condominiumId === selectedCondominium.id);
+    }
+    
+    // Filter by search term
+    if (searchTerm.trim() !== '') {
+      filtered = filtered.filter(user => 
         user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.residentType.toLowerCase().includes(searchTerm.toLowerCase())
       );
-      setFilteredUsers(filtered);
     }
-    // Resetar para a primeira página quando a busca mudar
+    
+    setFilteredUsers(filtered);
+    setTotalPages(Math.ceil(filtered.length / itemsPerPage));
     setCurrentPage(1);
-  }, [searchTerm, users]);
-
-  // Atualizar o número total de páginas quando os usuários filtrados mudarem
-  useEffect(() => {
-    setTotalPages(Math.ceil(filteredUsers.length / itemsPerPage));
-    // Resetar para a primeira página quando mudar o número de itens por página
-    setCurrentPage(1);
-  }, [filteredUsers, itemsPerPage]);
+  }, [searchTerm, users, selectedCondominium, itemsPerPage]);
 
   const handleDeleteUser = (userId: number) => {
     // Em uma aplicação real, isso seria uma chamada à API
@@ -134,6 +186,50 @@ export default function ResidentsPage() {
           <RiGroupLine className="mr-1.5 text-lg" />
           Novo Morador
         </Link>
+      </div>
+
+      {/* Condominium Selector */}
+      <div className="mb-6">
+        <div className="relative" ref={condominiumDropdownRef}>
+          <button 
+            onClick={toggleCondominiumDropdown}
+            className="flex items-center space-x-2 px-3 py-2 rounded-md bg-purple-50 hover:bg-purple-100 transition-colors"
+          >
+            <RiBuilding2Line className="text-purple-600" />
+            <span className="text-sm font-medium text-gray-700">
+              {selectedCondominium.id === 0 ? "Todos os condomínios" : selectedCondominium.name}
+            </span>
+            <FaChevronDown className="text-gray-500 text-xs" />
+          </button>
+          
+          {isCondominiumDropdownOpen && (
+            <div className="absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white z-10">
+              <div className="py-1" role="menu" aria-orientation="vertical">
+                <button
+                  onClick={() => handleCondominiumSelect({ id: 0, name: "Todos os condomínios" })}
+                  className={`${
+                    selectedCondominium.id === 0 ? 'bg-purple-50 text-purple-700' : 'text-gray-700'
+                  } block w-full text-left px-4 py-2 text-sm hover:bg-gray-100`}
+                  role="menuitem"
+                >
+                  Todos os condomínios
+                </button>
+                {mockCondominiums.map((condominium) => (
+                  <button
+                    key={condominium.id}
+                    onClick={() => handleCondominiumSelect(condominium)}
+                    className={`${
+                      selectedCondominium.id === condominium.id ? 'bg-purple-50 text-purple-700' : 'text-gray-700'
+                    } block w-full text-left px-4 py-2 text-sm hover:bg-gray-100`}
+                    role="menuitem"
+                  >
+                    {condominium.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Barra de pesquisa */}

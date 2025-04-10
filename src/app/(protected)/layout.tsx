@@ -117,14 +117,22 @@ export default function ProtectedLayout({
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow-sm relative">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex justify-between items-center h-16">
-            {/* Left side - empty for balance */}
-            <div className="w-[30px]"></div>
+      <header className="bg-white shadow-sm fixed top-0 left-0 right-0 z-30">
+        <div className="w-full">
+          <div className="flex items-center h-20">
+            {/* Left side - Logo */}
+            <div className="w-64 flex justify-center items-center">
+              <Link href="/dashboard" className="flex items-center">
+                <img
+                  src="/images/zcondologo.jpg"
+                  alt="ZCONDO - Gestão Condominial"
+                  className="h-16"
+                />
+              </Link>
+            </div>
             
             {/* Center - Condominium Selector */}
-            <div className="flex items-center justify-center">
+            <div className="flex-1 flex justify-center items-center">
               {isDashboard && (
                 <div className="relative" ref={condominiumDropdownRef}>
                   <button 
@@ -137,7 +145,7 @@ export default function ProtectedLayout({
                   </button>
                   
                   {isCondominiumDropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white z-10">
+                    <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 w-56 rounded-md shadow-lg bg-white z-10">
                       <div className="py-1" role="menu" aria-orientation="vertical">
                         {mockCondominiums.map((condominium) => (
                           <button
@@ -158,134 +166,131 @@ export default function ProtectedLayout({
               )}
             </div>
             
-            {/* Right side - empty for balance */}
-            <div className="w-[30px]"></div>
-          </div>
-        </div>
-        
-        {/* User Menu - With 30px margin from the right edge */}
-        <div className="absolute right-[30px] top-0 h-16 flex items-center" ref={userDropdownRef}>
-          <button 
-            onClick={toggleUserDropdown}
-            className="flex items-center justify-center w-10 h-10 rounded-full bg-purple-100 text-purple-700 font-medium hover:bg-purple-200 transition-colors text-center"
-          >
-            {initials}
-          </button>
-          
-          {isUserDropdownOpen && (
-            <div className="absolute right-0 top-16 w-56 rounded-md shadow-lg bg-white z-10">
-              <div className="py-1" role="menu" aria-orientation="vertical">
-                <div className="px-4 py-2 border-b border-gray-100">
-                  <p className="text-sm font-medium text-gray-900">{username}</p>
-                  <p className="text-xs text-gray-500 truncate">{user?.email}</p>
-                </div>
-                
-                <Link 
-                  href="/configuracoes/perfil" 
-                  className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  role="menuitem"
+            {/* Right side - User Menu */}
+            <div className="w-64 flex justify-end items-center pr-8">
+              <div ref={userDropdownRef}>
+                <button 
+                  onClick={toggleUserDropdown}
+                  className="flex items-center justify-center w-10 h-10 rounded-full bg-purple-100 text-purple-700 font-medium hover:bg-purple-200 transition-colors text-center"
                 >
-                  <RiUserSettingsLine className="mr-3 text-gray-500" />
-                  Configurações de Perfil
-                </Link>
+                  {initials}
+                </button>
                 
-                <Link 
-                  href="/change-password" 
-                  className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  role="menuitem"
-                >
-                  <RiLockPasswordLine className="mr-3 text-gray-500" />
-                  Alterar Senha
-                </Link>
-                
-                <div className="border-t border-gray-100">
-                  <button
-                    onClick={logout}
-                    className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    role="menuitem"
-                  >
-                    <RiLogoutBoxLine className="mr-3 text-gray-500" />
-                    Sair
-                  </button>
-                </div>
+                {isUserDropdownOpen && (
+                  <div className="absolute right-8 mt-2 w-56 rounded-md shadow-lg bg-white z-10">
+                    <div className="py-1" role="menu" aria-orientation="vertical">
+                      <div className="px-4 py-2 border-b border-gray-100">
+                        <p className="text-sm font-medium text-gray-900">{username}</p>
+                        <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+                      </div>
+                      
+                      <Link 
+                        href="/configuracoes/perfil" 
+                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        role="menuitem"
+                      >
+                        <RiUserSettingsLine className="mr-3 text-gray-500" />
+                        Configurações
+                      </Link>
+                      
+                      <Link 
+                        href="/change-password" 
+                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        role="menuitem"
+                      >
+                        <RiLockPasswordLine className="mr-3 text-gray-500" />
+                        Alterar Senha
+                      </Link>
+                      
+                      <div className="border-t border-gray-100">
+                        <button
+                          onClick={logout}
+                          className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          role="menuitem"
+                        >
+                          <RiLogoutBoxLine className="mr-3 text-gray-500" />
+                          Sair
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
-          )}
+          </div>
         </div>
       </header>
       
-      <div className="flex">
+      <div className="flex pt-20">
         {/* Sidebar */}
         <aside className={`${
           isSidebarOpen ? 'w-64' : 'w-20'
-        } bg-white shadow-sm h-[calc(100vh-4rem)] transition-all duration-300 fixed left-0 top-16`}>
+        } bg-white shadow-sm h-[calc(100vh-5rem)] transition-all duration-300 fixed left-0 top-20 z-20`}>
           <div className="p-4">
-            <button 
-              onClick={toggleSidebar}
-              className="mb-6 p-2 rounded-md hover:bg-gray-100"
-            >
-              <RiMenuLine className="text-gray-500" />
-            </button>
-            
             <nav className="space-y-1">
-              <Link 
-                href="/dashboard" 
-                className={`flex items-center p-2 rounded-md ${
-                  pathname === '/dashboard' 
-                    ? 'bg-purple-50 text-purple-700' 
-                    : 'text-gray-700 hover:bg-gray-100'
+              <button 
+                onClick={toggleSidebar}
+                className={`w-full flex items-center ${
+                  isSidebarOpen ? 'px-2' : 'justify-center'
+                } py-2 mb-6 text-sm font-medium rounded-md text-gray-600`}
+              >
+                <RiMenuLine className={`${isSidebarOpen ? 'text-base' : 'text-lg'} transition-all duration-300`} />
+              </button>
+
+              <Link
+                href="/dashboard"
+                className={`flex items-center ${
+                  isSidebarOpen ? 'px-2' : 'justify-center'
+                } py-2 text-sm font-medium rounded-md hover:bg-gray-100 ${
+                  pathname === '/dashboard'
+                    ? 'text-purple-700 bg-purple-50'
+                    : 'text-gray-600'
                 }`}
               >
-                <RiHome4Line className="mr-3" />
-                {isSidebarOpen && <span>Dashboard</span>}
-              </Link>
-              
-              <Link 
-                href="/condominios" 
-                className={`flex items-center p-2 rounded-md ${
-                  pathname === '/condominios' 
-                    ? 'bg-purple-50 text-purple-700' 
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                <RiBuilding2Line className="mr-3" />
-                {isSidebarOpen && <span>Condomínios</span>}
-              </Link>
-              
-              <Link 
-                href="/moradores" 
-                className={`flex items-center p-2 rounded-md ${
-                  pathname === '/moradores' 
-                    ? 'bg-purple-50 text-purple-700' 
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                <RiGroupLine className="mr-3" />
-                {isSidebarOpen && <span>Moradores</span>}
+                <RiHome4Line className={`${isSidebarOpen ? 'text-base' : 'text-lg'} transition-all duration-300`} />
+                <span className={`ml-3 transition-all ${isSidebarOpen ? 'duration-500' : 'duration-300'} ${isSidebarOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0'}`}>Dashboard</span>
               </Link>
 
-              <Link 
-                href="/financeiro" 
-                className={`flex items-center p-2 rounded-md ${
-                  pathname.startsWith('/financeiro')
-                    ? 'bg-purple-50 text-purple-700' 
-                    : 'text-gray-700 hover:bg-gray-100'
+              <Link
+                href="/condominios"
+                className={`flex items-center ${
+                  isSidebarOpen ? 'px-2' : 'justify-center'
+                } py-2 text-sm font-medium rounded-md hover:bg-gray-100 ${
+                  pathname.startsWith('/condominios')
+                    ? 'text-purple-700 bg-purple-50'
+                    : 'text-gray-600'
                 }`}
               >
-                <RiMoneyDollarCircleLine className="mr-3" />
-                {isSidebarOpen && <span>Financeiro</span>}
+                <RiBuilding2Line className={`${isSidebarOpen ? 'text-base' : 'text-lg'} transition-all duration-300`} />
+                <span className={`ml-3 transition-all ${isSidebarOpen ? 'duration-500' : 'duration-300'} ${isSidebarOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0'}`}>Condomínios</span>
               </Link>
-              
-              <Link 
-                href="/settings" 
-                className={`flex items-center p-2 rounded-md ${
-                  pathname === '/settings' 
-                    ? 'bg-purple-50 text-purple-700' 
-                    : 'text-gray-700 hover:bg-gray-100'
+
+              <Link
+                href="/moradores"
+                className={`flex items-center ${
+                  isSidebarOpen ? 'px-2' : 'justify-center'
+                } py-2 text-sm font-medium rounded-md hover:bg-gray-100 ${
+                  pathname.startsWith('/moradores')
+                    ? 'text-purple-700 bg-purple-50'
+                    : 'text-gray-600'
                 }`}
               >
-                <RiSettings4Line className="mr-3" />
-                {isSidebarOpen && <span>Configurações</span>}
+                <RiGroupLine className={`${isSidebarOpen ? 'text-base' : 'text-lg'} transition-all duration-300`} />
+                <span className={`ml-3 transition-all ${isSidebarOpen ? 'duration-500' : 'duration-300'} ${isSidebarOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0'}`}>Moradores</span>
+              </Link>
+
+              <Link
+                href="/financeiro"
+                className={`flex items-center ${
+                  isSidebarOpen ? 'px-2' : 'justify-center'
+                } py-2 text-sm font-medium rounded-md hover:bg-gray-100 ${
+                  pathname.startsWith('/financeiro')
+                    ? 'text-purple-700 bg-purple-50'
+                    : 'text-gray-600'
+                }`}
+              >
+                <RiMoneyDollarCircleLine className={`${isSidebarOpen ? 'text-base' : 'text-lg'} transition-all duration-300`} />
+                <span className={`ml-3 transition-all ${isSidebarOpen ? 'duration-500' : 'duration-300'} ${isSidebarOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0'}`}>Financeiro</span>
               </Link>
             </nav>
           </div>
