@@ -14,7 +14,6 @@ import {
 } from 'react-icons/ri';
 import { FaChevronDown } from 'react-icons/fa';
 import Link from 'next/link';
-import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 
 // Mock data for condominiums - in a real app, this would come from an API
