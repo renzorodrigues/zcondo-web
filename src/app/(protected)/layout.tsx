@@ -4,7 +4,6 @@ import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { 
   RiHome4Line, 
-  RiSettings4Line, 
   RiLogoutBoxLine,
   RiMenuLine,
   RiBuilding2Line,
@@ -15,6 +14,7 @@ import {
 } from 'react-icons/ri';
 import { FaChevronDown } from 'react-icons/fa';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 
 // Mock data for condominiums - in a real app, this would come from an API
@@ -119,20 +119,12 @@ export default function ProtectedLayout({
       {/* Header */}
       <header className="bg-white shadow-sm fixed top-0 left-0 right-0 z-30">
         <div className="w-full">
-          <div className="flex items-center h-20">
-            {/* Left side - Logo */}
-            <div className="w-64 flex justify-center items-center">
-              <Link href="/dashboard" className="flex items-center">
-                <img
-                  src="/images/zcondologo.jpg"
-                  alt="ZCONDO - Gestão Condominial"
-                  className="h-16"
-                />
-              </Link>
-            </div>
+          <div className="flex items-center justify-between h-20">
+            {/* Left side - Empty space for balance */}
+            <div className="w-64"></div>
             
             {/* Center - Condominium Selector */}
-            <div className="flex-1 flex justify-center items-center">
+            <div className="flex justify-center items-center">
               {isDashboard && (
                 <div className="relative" ref={condominiumDropdownRef}>
                   <button 
