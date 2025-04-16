@@ -18,6 +18,7 @@ const nextConfig = {
         pathname: '/images/**',
       }
     ],
+    unoptimized: true
   },
   experimental: {
     serverActions: {

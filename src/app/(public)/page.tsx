@@ -1,8 +1,7 @@
-'use client';
-
 import Link from 'next/link';
 import Image from 'next/image';
 import { RiArrowRightLine, RiTeamLine, RiBuildingLine, RiShieldCheckLine } from 'react-icons/ri';
+import ContactForm from '@/components/ContactForm';
 
 export default function LandingPage() {
   return (
@@ -116,35 +115,7 @@ export default function LandingPage() {
             <p className="text-gray-600 mb-8">
               Tire suas dúvidas e descubra como podemos ajudar na gestão do seu condomínio.
             </p>
-            <form className="space-y-4">
-              <div>
-                <input
-                  type="text"
-                  placeholder="Nome"
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
-                />
-              </div>
-              <div>
-                <input
-                  type="email"
-                  placeholder="Email"
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
-                />
-              </div>
-              <div>
-                <textarea
-                  placeholder="Mensagem"
-                  rows={4}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
-                ></textarea>
-              </div>
-              <button
-                type="submit"
-                className="w-full bg-purple-600 text-white font-medium py-3 px-6 rounded-lg hover:bg-purple-700 transition-colors"
-              >
-                Enviar mensagem
-              </button>
-            </form>
+            <ContactForm />
           </div>
         </div>
       </section>
