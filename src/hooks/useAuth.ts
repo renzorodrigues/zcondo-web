@@ -76,24 +76,29 @@ export function useAuth() {
       // Simulação de autenticação
       // Em um ambiente real, isso seria uma chamada à API
       if (email && password) {
-        // Criar um usuário fake
-        const fakeUser = {
-          id: '1',
-          name: 'Usuário Teste',
-          email: email,
-          role: 'admin'
-        };
-        
-        // Salvar no estado e no localStorage
-        setUser(fakeUser);
-        localStorage.setItem('user', JSON.stringify(fakeUser));
-        
-        // Adicionar um cookie de autenticação
-        Cookies.set('auth-token', 'fake-token', { expires: 7 }); // Expira em 7 dias
-        
-        // Redirecionar para o dashboard
-        router.push('/dashboard');
-        return true;
+        // Verificar credenciais de demonstração
+        if (email === 'demo@zcondo.com.br' && password === 'demo123') {
+          // Criar um usuário fake
+          const fakeUser = {
+            id: '1',
+            name: 'Usuário Demo',
+            email: email,
+            role: 'admin'
+          };
+          
+          // Salvar no estado e no localStorage
+          setUser(fakeUser);
+          localStorage.setItem('user', JSON.stringify(fakeUser));
+          
+          // Adicionar um cookie de autenticação
+          Cookies.set('auth-token', 'fake-token', { expires: 7 }); // Expira em 7 dias
+          
+          // Redirecionar para o dashboard
+          router.push('/dashboard');
+          return true;
+        } else {
+          throw new Error('Credenciais inválidas');
+        }
       } else {
         throw new Error('Email e senha são obrigatórios');
       }
@@ -106,23 +111,20 @@ export function useAuth() {
   };
 
   const logout = () => {
-    // Remover o usuário do estado e do localStorage
+    // Remover dados do usuário
     setUser(null);
     localStorage.removeItem('user');
-    
-    // Remover o cookie de autenticação
     Cookies.remove('auth-token');
     
-    // Redirecionar para o login
-    router.push('/login');
+    // Redirecionar para a página inicial
+    router.push('/');
   };
 
   return {
     user,
     loading,
     login,
-    logout,
     register,
-    isAuthenticated: !!user
+    logout
   };
 } 
