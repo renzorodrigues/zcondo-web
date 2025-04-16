@@ -25,7 +25,6 @@ const nextConfig = {
       allowedOrigins: ['localhost:3000', 'zcondo-web.vercel.app'],
     },
   },
-  output: 'standalone',
 };
 
 module.exports = nextConfig; 
