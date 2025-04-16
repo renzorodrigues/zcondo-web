@@ -31,7 +31,7 @@ export default function ProtectedLayout({
   children: React.ReactNode;
 }) {
   const { user, logout } = useAuth();
-  const pathname = usePathname();
+  const pathname = usePathname() || '';
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [selectedCondominium, setSelectedCondominium] = useState(mockCondominiums[0]);
   const [isCondominiumDropdownOpen, setIsCondominiumDropdownOpen] = useState(false);

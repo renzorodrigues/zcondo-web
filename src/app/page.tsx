@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import { RiShieldCheckLine, RiFlashlightLine, RiBarChartLine } from 'react-icons/ri';
 import Image from 'next/image';
