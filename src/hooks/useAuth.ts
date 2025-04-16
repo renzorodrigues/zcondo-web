@@ -33,6 +33,42 @@ export function useAuth() {
     setLoading(false);
   }, []);
 
+  const register = async (name: string, email: string, password: string) => {
+    try {
+      setLoading(true);
+      
+      // Simulação de registro
+      // Em um ambiente real, isso seria uma chamada à API
+      if (name && email && password) {
+        // Criar um usuário fake
+        const fakeUser = {
+          id: '1',
+          name: name,
+          email: email,
+          role: 'admin'
+        };
+        
+        // Salvar no estado e no localStorage
+        setUser(fakeUser);
+        localStorage.setItem('user', JSON.stringify(fakeUser));
+        
+        // Adicionar um cookie de autenticação
+        Cookies.set('auth-token', 'fake-token', { expires: 7 }); // Expira em 7 dias
+        
+        // Redirecionar para o dashboard
+        router.push('/dashboard');
+        return true;
+      } else {
+        throw new Error('Nome, email e senha são obrigatórios');
+      }
+    } catch (error) {
+      console.error('Register error:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const login = async (email: string, password: string) => {
     try {
       setLoading(true);
@@ -86,6 +122,7 @@ export function useAuth() {
     loading,
     login,
     logout,
+    register,
     isAuthenticated: !!user
   };
 } 

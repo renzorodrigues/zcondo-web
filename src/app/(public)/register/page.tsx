@@ -5,24 +5,34 @@ import { useAuth } from '@/hooks/useAuth';
 import { FcGoogle } from 'react-icons/fc';
 import { FaFacebook, FaEye, FaEyeSlash } from 'react-icons/fa';
 import Image from 'next/image';
+import Link from 'next/link';
 
-export default function LoginPage() {
+export default function RegisterPage() {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const { login } = useAuth();
+  const { register } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (password !== confirmPassword) {
+      setError('As senhas não coincidem');
+      return;
+    }
+    
     setIsLoading(true);
     setError('');
     
     try {
-      await login(email, password);
-    } catch {
-      setError('Credenciais inválidas');
+      await register(name, email, password);
+    } catch (err) {
+      console.error('Erro ao registrar:', err);
+      setError('Erro ao criar conta. Por favor, tente novamente.');
     } finally {
       setIsLoading(false);
     }
@@ -45,9 +55,9 @@ export default function LoginPage() {
         </div>
         
         <div className="relative z-20 w-full flex flex-col items-center justify-center px-24 text-white">
-          <h1 className="text-6xl font-bold mb-8">Bem-vindo(a)</h1>
+          <h1 className="text-6xl font-bold mb-8">Crie sua conta</h1>
           <p className="text-xl text-primary-100 text-center max-w-2xl">
-            Acesse sua conta para gerenciar seus condomínios e acompanhar todas as informações importantes.
+            Junte-se a milhares de síndicos e administradores que já confiam na ZCondo para gerenciar seus condomínios.
           </p>
         </div>
       </div>
@@ -57,10 +67,10 @@ export default function LoginPage() {
         <div className="w-full max-w-sm mx-auto space-y-8">
           <div className="text-center">
             <h2 className="text-3xl font-bold text-gray-900">
-              Login
+              Cadastro
             </h2>
             <p className="mt-2 text-sm text-gray-600">
-              Entre com suas credenciais para continuar
+              Crie sua conta para começar
             </p>
           </div>
 
@@ -102,6 +112,22 @@ export default function LoginPage() {
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-5">
               <div>
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                  Nome completo
+                </label>
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl border border-gray-300 text-gray-900 focus:ring-1 focus:ring-primary-500/20 focus:border-primary-500 transition-all duration-200"
+                  placeholder="João Silva"
+                />
+              </div>
+
+              <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                   Email
                 </label>
@@ -127,7 +153,6 @@ export default function LoginPage() {
                     id="password"
                     name="password"
                     type={showPassword ? "text" : "password"}
-                    autoComplete="current-password"
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -144,15 +169,32 @@ export default function LoginPage() {
                   </button>
                 </div>
               </div>
-            </div>
 
-            <div className="flex items-center justify-end">
-              <a
-                href="/forgot-password"
-                className="text-sm text-primary-600 hover:text-primary-500 font-medium"
-              >
-                Esqueceu a senha?
-              </a>
+              <div>
+                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+                  Confirmar senha
+                </label>
+                <div className="relative">
+                  <input
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type={showConfirmPassword ? "text" : "password"}
+                    required
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-300 text-gray-900 focus:ring-1 focus:ring-primary-500/20 focus:border-primary-500 transition-all duration-200"
+                    placeholder="••••••••"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                    aria-label={showConfirmPassword ? "Ocultar senha" : "Mostrar senha"}
+                  >
+                    {showConfirmPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
+                  </button>
+                </div>
+              </div>
             </div>
 
             <button
@@ -160,16 +202,16 @@ export default function LoginPage() {
               disabled={isLoading}
               className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-medium py-3 px-4 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-md flex items-center justify-center"
             >
-              {isLoading ? 'Entrando...' : 'Entrar'}
+              {isLoading ? 'Criando conta...' : 'Criar conta'}
             </button>
           </form>
 
           <div className="text-center">
             <span className="text-sm text-gray-500">
-              Não tem uma conta?{' '}
-              <a href="/register" className="font-medium text-primary-600 hover:text-primary-500">
-                Criar conta
-              </a>
+              Já tem uma conta?{' '}
+              <Link href="/login" className="font-medium text-primary-600 hover:text-primary-500">
+                Fazer login
+              </Link>
             </span>
           </div>
         </div>
