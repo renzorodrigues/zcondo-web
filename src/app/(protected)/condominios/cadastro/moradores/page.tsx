@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { RiUserLine, RiArrowLeftLine, RiAddLine, RiDeleteBinLine, RiCheckLine } from 'react-icons/ri';
 import { CondominioSteps } from '@/components/ui/Steps';
+import { toast } from 'react-hot-toast';
 
 interface Morador {
   id: string;
@@ -46,13 +47,13 @@ export default function CadastroMoradoresPage() {
   const [unidades, setUnidades] = useState<Unidade[]>([]);
   const [moradores, setMoradores] = useState<Morador[]>([]);
   const [moradoresDisponiveis, setMoradoresDisponiveis] = useState<MoradorDisponivel[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
     unidadeId: '',
     tipo: ''
   });
   const [moradoresSelecionados, setMoradoresSelecionados] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Carregar dados do localStorage (simulando dados da API)
   useEffect(() => {
@@ -127,21 +128,17 @@ export default function CadastroMoradoresPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    
+    setIsLoading(true);
+
     try {
-      // TODO: Implementar a chamada à API para salvar os moradores
-      console.log('Dados dos moradores:', moradores);
-      
-      // Simular um delay para mostrar o loading
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Redirecionar para a página de listagem de condomínios
+      // Aqui você faria a chamada para a API para cadastrar os moradores
+      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulando uma chamada à API
+      toast.success('Moradores cadastrados com sucesso!');
       router.push('/condominios');
     } catch (error) {
       console.error('Erro ao cadastrar moradores:', error);
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
 
@@ -333,10 +330,10 @@ export default function CadastroMoradoresPage() {
               </button>
               <button
                 onClick={handleSubmit}
-                disabled={isSubmitting}
+                disabled={isLoading}
                 className="flex items-center justify-center w-10 h-10 bg-purple-600 text-white rounded-full hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50"
               >
-                {isSubmitting ? (
+                {isLoading ? (
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 ) : (
                   <RiCheckLine className="text-xl" />

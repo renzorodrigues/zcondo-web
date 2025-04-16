@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { RiArrowLeftLine, RiUserAddLine } from 'react-icons/ri';
+import { toast } from 'react-hot-toast';
 
 export default function ResidentRegistrationPage() {
   const router = useRouter();
@@ -35,58 +36,14 @@ export default function ResidentRegistrationPage() {
     }
   };
 
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {};
-    
-    if (!formData.name.trim()) {
-      newErrors.name = 'Nome é obrigatório';
-    }
-    
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email é obrigatório';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email inválido';
-    }
-    
-    if (!formData.password) {
-      newErrors.password = 'Senha é obrigatória';
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'A senha deve ter pelo menos 6 caracteres';
-    }
-    
-    if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'As senhas não coincidem';
-    }
-    
-    if (!formData.cpf.trim()) {
-      newErrors.cpf = 'CPF é obrigatório';
-    }
-    
-    if (!formData.phone.trim()) {
-      newErrors.phone = 'Telefone é obrigatório';
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
-    
     setIsSubmitting(true);
-    
+
     try {
-      // Simulação de envio para API
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Em uma aplicação real, isso seria uma chamada à API
-      console.log('Dados do morador:', formData);
-      
-      // Redirecionar para a página de moradores
+      // Aqui você faria a chamada para a API para cadastrar o morador
+      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulando uma chamada à API
+      toast.success('Morador cadastrado com sucesso!');
       router.push('/moradores');
     } catch (error) {
       console.error('Erro ao cadastrar morador:', error);

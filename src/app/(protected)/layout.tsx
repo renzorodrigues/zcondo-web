@@ -123,7 +123,7 @@ export default function ProtectedLayout({
             {/* Left side - Logo */}
             <div className="w-64 flex justify-center items-center">
               <Image
-                src="/logo.png"
+                src="/images/zcondologo.jpg"
                 alt="ZCondo Logo"
                 width={120}
                 height={64}

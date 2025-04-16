@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { RiArrowLeftLine, RiArrowRightLine } from 'react-icons/ri';
 import { CondominioSteps } from '@/components/ui/Steps';
+import { toast } from 'react-hot-toast';
 
 export default function CadastroCondominioPage() {
   const router = useRouter();
@@ -27,15 +28,11 @@ export default function CadastroCondominioPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     try {
-      // TODO: Implementar a chamada à API para salvar o condomínio
-      console.log('Dados do condomínio:', formData);
-      
-      // Simular um delay para mostrar o loading
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Redirecionar para a página de cadastro de blocos
+      // Aqui você faria a chamada para a API para cadastrar o condomínio
+      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulando uma chamada à API
+      toast.success('Condomínio cadastrado com sucesso!');
       router.push('/condominios/cadastro/blocos');
     } catch (error) {
       console.error('Erro ao cadastrar condomínio:', error);

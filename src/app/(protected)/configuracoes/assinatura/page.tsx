@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { RiVipCrownLine, RiCheckLine, RiIdCardLine, RiHistoryLine, RiLockLine, RiArrowRightLine } from 'react-icons/ri';
-import { useRouter } from 'next/navigation';
+import { toast } from 'react-hot-toast';
 
 interface Plan {
   id: string;
@@ -31,11 +31,9 @@ interface PaymentMethod {
 }
 
 export default function ConfiguracoesAssinaturaPage() {
-  const router = useRouter();
   const [selectedPlan, setSelectedPlan] = useState<string>('premium');
   const [billingPeriod, setBillingPeriod] = useState<'mensal' | 'anual'>('mensal');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [notification, setNotification] = useState<{type: 'success' | 'error', message: string} | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Mock data - in a real app, this would come from an API
   const plans: Plan[] = [
@@ -133,36 +131,16 @@ export default function ConfiguracoesAssinaturaPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    setNotification(null);
-    
+    setIsLoading(true);
+
     try {
-      // Simular uma chamada à API para atualizar a assinatura
-      console.log('Plano selecionado:', selectedPlan);
-      console.log('Período de cobrança:', billingPeriod);
-      
-      // Simular um delay para mostrar o loading
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Mostrar mensagem de sucesso
-      setNotification({
-        type: 'success',
-        message: 'Assinatura atualizada com sucesso!'
-      });
-      
-      // Redirecionar para a página de perfil após 1.5 segundos
-      setTimeout(() => {
-        router.push('/configuracoes/perfil');
-      }, 1500);
+      // Aqui você faria a chamada para a API para atualizar a assinatura
+      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulando uma chamada à API
+      toast.success('Assinatura atualizada com sucesso!');
     } catch (error) {
       console.error('Erro ao atualizar assinatura:', error);
-      // Mostrar mensagem de erro
-      setNotification({
-        type: 'error',
-        message: 'Erro ao atualizar assinatura. Tente novamente.'
-      });
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
 
@@ -183,16 +161,6 @@ export default function ConfiguracoesAssinaturaPage() {
         <h1 className="text-2xl font-bold text-gray-800">Configurações da Assinatura</h1>
         <p className="text-gray-600 mt-1">Gerencie seu plano, histórico de cobranças e métodos de pagamento</p>
       </div>
-      
-      {notification && (
-        <div className={`mb-6 p-4 rounded-md ${
-          notification.type === 'success' 
-            ? 'bg-green-50 text-green-800 border border-green-200' 
-            : 'bg-red-50 text-red-800 border border-red-200'
-        }`}>
-          {notification.message}
-        </div>
-      )}
       
       <div className="space-y-6">
         {/* Seleção de Plano */}
@@ -414,10 +382,10 @@ export default function ConfiguracoesAssinaturaPage() {
           <button
             type="button"
             onClick={handleSubmit}
-            disabled={isSubmitting}
+            disabled={isLoading}
             className="px-6 py-3 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50 flex items-center"
           >
-            {isSubmitting ? (
+            {isLoading ? (
               <>
                 <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>

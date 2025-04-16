@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { RiBuilding2Line, RiArrowLeftLine, RiAddLine, RiDeleteBinLine, RiHomeLine, RiArrowRightLine } from 'react-icons/ri';
 import { CondominioSteps } from '@/components/ui/Steps';
+import { toast } from 'react-hot-toast';
 
 interface Unidade {
   id: string;
@@ -26,7 +27,6 @@ export default function CadastroUnidadesPage() {
   const router = useRouter();
   const [blocos, setBlocos] = useState<Bloco[]>([]);
   const [unidades, setUnidades] = useState<Unidade[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
     blocoId: '',
@@ -36,6 +36,7 @@ export default function CadastroUnidadesPage() {
     area: '',
     vagas: ''
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   // Carregar blocos do localStorage (simulando dados da API)
   useEffect(() => {
@@ -76,21 +77,17 @@ export default function CadastroUnidadesPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    
+    setIsLoading(true);
+
     try {
-      // TODO: Implementar a chamada à API para salvar as unidades
-      console.log('Dados das unidades:', unidades);
-      
-      // Simular um delay para mostrar o loading
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Redirecionar para a página de vinculação de moradores
+      // Aqui você faria a chamada para a API para cadastrar as unidades
+      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulando uma chamada à API
+      toast.success('Unidades cadastradas com sucesso!');
       router.push('/condominios/cadastro/moradores');
     } catch (error) {
       console.error('Erro ao cadastrar unidades:', error);
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
 
@@ -326,10 +323,10 @@ export default function CadastroUnidadesPage() {
               </button>
               <button
                 onClick={handleSubmit}
-                disabled={isSubmitting}
+                disabled={isLoading}
                 className="flex items-center justify-center w-10 h-10 bg-purple-600 text-white rounded-full hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50"
               >
-                {isSubmitting ? (
+                {isLoading ? (
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 ) : (
                   <RiArrowRightLine className="text-xl" />

@@ -2,87 +2,103 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { RiBuilding2Line, RiArrowLeftLine, RiAddLine, RiDeleteBinLine, RiArrowRightLine } from 'react-icons/ri';
+import { RiBuilding2Line, RiArrowLeftLine, RiDeleteBinLine } from 'react-icons/ri';
 import { CondominioSteps } from '@/components/ui/Steps';
+import { Button } from '@/components/ui/Button';
 
 interface Bloco {
-  id: string;
   nome: string;
-  andares: number;
-  unidadesPorAndar: number;
+  numeroAndares: string;
+  unidadesPorAndar: string;
 }
 
 export default function CadastroBlocosPage() {
   const router = useRouter();
   const [blocos, setBlocos] = useState<Bloco[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [formData, setFormData] = useState<Bloco>({
     nome: '',
-    andares: '',
-    unidadesPorAndar: ''
+    numeroAndares: '1',
+    unidadesPorAndar: '1'
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    if (name === 'numeroAndares' || name === 'unidadesPorAndar') {
+      const numValue = parseInt(value);
+      if (numValue < 1) return;
+    }
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
-  const handleAddBloco = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleAddBloco = () => {
+    const numAndares = parseInt(formData.numeroAndares);
+    const numUnidades = parseInt(formData.unidadesPorAndar);
     
-    const newBloco: Bloco = {
-      id: Date.now().toString(),
-      nome: formData.nome,
-      andares: parseInt(formData.andares),
-      unidadesPorAndar: parseInt(formData.unidadesPorAndar)
-    };
-    
-    setBlocos(prev => [...prev, newBloco]);
-    setFormData({ nome: '', andares: '', unidadesPorAndar: '' });
-    setShowForm(false);
+    if (formData.nome && numAndares > 0 && numUnidades > 0) {
+      setBlocos([...blocos, {
+        ...formData,
+        numeroAndares: String(numAndares),
+        unidadesPorAndar: String(numUnidades)
+      }]);
+      setFormData({
+        nome: '',
+        numeroAndares: '1',
+        unidadesPorAndar: '1'
+      });
+    }
   };
 
-  const handleRemoveBloco = (id: string) => {
-    setBlocos(prev => prev.filter(bloco => bloco.id !== id));
+  const handleRemoveBloco = (index: number) => {
+    setBlocos(blocos.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    
+    setLoading(true);
+    setError(null);
+
     try {
-      // TODO: Implementar a chamada à API para salvar os blocos
-      console.log('Dados dos blocos:', blocos);
-      
-      // Simular um delay para mostrar o loading
+      // TODO: Implement API call to save blocks
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Redirecionar para a página de cadastro de unidades
-      router.push('/condominios/cadastro/unidades');
-    } catch (error) {
-      console.error('Erro ao cadastrar blocos:', error);
+      handleAddBloco();
+      setShowForm(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro ao salvar o bloco');
     } finally {
-      setIsSubmitting(false);
+      setLoading(false);
     }
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <div className="flex items-center mb-6">
-        <button 
-          onClick={() => router.back()}
-          className="mr-4 p-2 rounded-full hover:bg-gray-100"
-        >
-          <RiArrowLeftLine className="text-gray-600 text-xl" />
-        </button>
-        <h1 className="text-2xl font-bold text-gray-800">Cadastro de Blocos</h1>
+    <div className="container mx-auto px-4 py-8">
+      <div className="mb-8">
+        <CondominioSteps currentStep="2" />
       </div>
-      
-      {/* Componente de Steps */}
-      <CondominioSteps currentStep="blocos" />
-      
-      <div className="bg-white rounded-lg shadow p-6">
+
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-semibold text-gray-900">Cadastro de Blocos</h1>
+          <button
+            onClick={() => router.back()}
+            className="flex items-center text-gray-600 hover:text-gray-900"
+          >
+            <RiArrowLeftLine className="mr-1" />
+            Voltar
+          </button>
+        </div>
+
+        {error && (
+          <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-600 rounded-md">
+            {error}
+          </div>
+        )}
+
         <div className="mb-6">
           <button
             onClick={() => setShowForm(!showForm)}
@@ -94,10 +110,10 @@ export default function CadastroBlocosPage() {
         </div>
         
         {showForm && (
-          <form onSubmit={handleAddBloco} className="mb-6 p-4 border border-gray-200 rounded-md">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label htmlFor="nome" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="nome" className="block text-sm font-medium text-gray-700">
                   Nome do Bloco
                 </label>
                 <input
@@ -106,138 +122,78 @@ export default function CadastroBlocosPage() {
                   name="nome"
                   value={formData.nome}
                   onChange={handleChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  placeholder="Ex: Bloco A"
                 />
               </div>
-              
               <div>
-                <label htmlFor="andares" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="numeroAndares" className="block text-sm font-medium text-gray-700">
                   Número de Andares
                 </label>
                 <input
                   type="number"
-                  id="andares"
-                  name="andares"
-                  value={formData.andares}
+                  id="numeroAndares"
+                  name="numeroAndares"
+                  value={formData.numeroAndares.toString()}
                   onChange={handleChange}
-                  required
                   min="1"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  placeholder="Ex: 10"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                  required
                 />
               </div>
-              
               <div>
-                <label htmlFor="unidadesPorAndar" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="unidadesPorAndar" className="block text-sm font-medium text-gray-700">
                   Unidades por Andar
                 </label>
                 <input
                   type="number"
                   id="unidadesPorAndar"
                   name="unidadesPorAndar"
-                  value={formData.unidadesPorAndar}
+                  value={formData.unidadesPorAndar.toString()}
                   onChange={handleChange}
-                  required
                   min="1"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  placeholder="Ex: 4"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                  required
                 />
               </div>
             </div>
             
-            <div className="flex justify-end mt-4">
-              <button
-                type="submit"
-                className="flex items-center justify-center w-10 h-10 bg-purple-600 text-white rounded-full hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+            <div className="flex justify-end space-x-4">
+              <Button 
+                type="submit" 
+                className="w-full" 
+                disabled={loading}
               >
-                <RiAddLine className="text-xl" />
-              </button>
+                {loading ? 'Salvando...' : 'Adicionar Bloco'}
+              </Button>
             </div>
           </form>
         )}
         
-        {blocos.length > 0 ? (
-          <>
-            <div className="mb-6">
-              <h2 className="text-lg font-medium text-gray-800 mb-2">Blocos Cadastrados</h2>
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Nome
-                      </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Andares
-                      </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Unidades por Andar
-                      </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Total de Unidades
-                      </th>
-                      <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Ações
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {blocos.map(bloco => (
-                      <tr key={bloco.id}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                          {bloco.nome}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {bloco.andares}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {bloco.unidadesPorAndar}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {bloco.andares * bloco.unidadesPorAndar}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                          <button
-                            onClick={() => handleRemoveBloco(bloco.id)}
-                            className="text-red-600 hover:text-red-900"
-                          >
-                            <RiDeleteBinLine className="text-xl" />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+        {blocos.length > 0 && (
+          <div className="mt-8">
+            <h2 className="text-lg font-medium text-gray-900 mb-4">Blocos Adicionados</h2>
+            <div className="space-y-4">
+              {blocos.map((bloco, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+                >
+                  <div>
+                    <p className="font-medium text-gray-900">{bloco.nome}</p>
+                    <p className="text-sm text-gray-500">
+                      {bloco.numeroAndares} andares • {bloco.unidadesPorAndar} unidades por andar
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => handleRemoveBloco(index)}
+                    className="text-red-600 hover:text-red-700"
+                  >
+                    <RiDeleteBinLine className="text-xl" />
+                  </button>
+                </div>
+              ))}
             </div>
-            
-            <div className="flex justify-between pt-4">
-              <button
-                type="button"
-                onClick={() => router.back()}
-                className="flex items-center justify-center w-10 h-10 bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-              >
-                <RiArrowLeftLine className="text-xl" />
-              </button>
-              <button
-                onClick={handleSubmit}
-                disabled={isSubmitting}
-                className="flex items-center justify-center w-10 h-10 bg-purple-600 text-white rounded-full hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50"
-              >
-                {isSubmitting ? (
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <RiArrowRightLine className="text-xl" />
-                )}
-              </button>
-            </div>
-          </>
-        ) : (
-          <div className="text-center py-8">
-            <RiBuilding2Line className="mx-auto text-gray-400 text-5xl mb-4" />
-            <p className="text-gray-500">Nenhum bloco cadastrado. Adicione um bloco para continuar.</p>
           </div>
         )}
       </div>

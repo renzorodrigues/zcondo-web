@@ -150,9 +150,6 @@ export default function DashboardPage() {
   useEffect(() => {
     // In a real app, this would be an API call
     setDashboardData(mockDashboardData[selectedCondominiumId]);
-    
-    // Log to verify the effect is running
-    console.log('Dashboard updated for condominium:', selectedCondominiumId);
   }, [selectedCondominiumId]);
 
   // Listen for condominium selection changes from localStorage

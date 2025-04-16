@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { RiBuilding2Line, RiArrowLeftLine, RiDeleteBinLine } from 'react-icons/ri';
+import { toast } from 'react-hot-toast';
 
 interface Condominio {
   id: number;
@@ -77,14 +78,23 @@ export default function CondominiosPage() {
     router.push('/condominios/cadastro');
   };
 
-  const handleEditCondominio = (id: number) => {
-    // TODO: Implementar edição de condomínio
-    console.log('Editar condomínio:', id);
+  const handleEdit = (id: number) => {
+    router.push(`/condominios/editar/${id}`);
   };
 
-  const handleDeleteCondominio = (id: number) => {
-    // TODO: Implementar exclusão de condomínio
-    console.log('Excluir condomínio:', id);
+  const handleDelete = async (id: number) => {
+    if (window.confirm('Tem certeza que deseja excluir este condomínio?')) {
+      try {
+        // Aqui você faria a chamada para a API para excluir o condomínio
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Simulando uma chamada à API
+        toast.success('Condomínio excluído com sucesso!');
+        // Atualizar a lista de condomínios
+        setCondominios(condominios.filter(cond => cond.id !== id));
+      } catch (error) {
+        toast.error('Erro ao excluir condomínio');
+        console.error('Erro ao excluir condomínio:', error);
+      }
+    }
   };
 
   if (isLoading) {
@@ -155,13 +165,13 @@ export default function CondominiosPage() {
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex justify-end space-x-2">
                       <button
-                        onClick={() => handleEditCondominio(condominio.id)}
+                        onClick={() => handleEdit(condominio.id)}
                         className="text-indigo-600 hover:text-indigo-900"
                       >
                         <RiArrowLeftLine className="text-xl" />
                       </button>
                       <button
-                        onClick={() => handleDeleteCondominio(condominio.id)}
+                        onClick={() => handleDelete(condominio.id)}
                         className="text-red-600 hover:text-red-900"
                       >
                         <RiDeleteBinLine className="text-xl" />

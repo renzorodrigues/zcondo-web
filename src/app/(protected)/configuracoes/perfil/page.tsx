@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { RiUserLine, RiMailLine, RiPhoneLine, RiLockLine, RiEyeLine, RiEyeOffLine, RiVipCrownLine, RiCheckLine } from 'react-icons/ri';
 import { useRouter } from 'next/navigation';
+import { toast } from 'react-hot-toast';
 
 interface ProfileData {
   nome: string;
@@ -22,12 +23,14 @@ interface SubscriptionData {
 
 export default function ConfiguracoesPerfilPage() {
   const router = useRouter();
-  const [showPassword, setShowPassword] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<ProfileData>({
-    nome: '',
-    email: '',
-    telefone: '',
+    nome: 'João Silva',
+    email: 'joao.silva@email.com',
+    telefone: '(11) 99999-9999',
     senhaAtual: '',
     novaSenha: '',
     confirmarSenha: ''
@@ -55,26 +58,13 @@ export default function ConfiguracoesPerfilPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     try {
-      // TODO: Implementar a chamada à API para atualizar o perfil
-      console.log('Dados do perfil:', formData);
-      
-      // Simular um delay para mostrar o loading
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Limpar campos de senha após sucesso
-      setFormData(prev => ({
-        ...prev,
-        senhaAtual: '',
-        novaSenha: '',
-        confirmarSenha: ''
-      }));
-      
-      // TODO: Mostrar mensagem de sucesso
+      // Aqui você faria a chamada para a API para atualizar o perfil
+      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulando uma chamada à API
+      toast.success('Perfil atualizado com sucesso!');
     } catch (error) {
       console.error('Erro ao atualizar perfil:', error);
-      // TODO: Mostrar mensagem de erro
     } finally {
       setIsSubmitting(false);
     }
@@ -220,13 +210,24 @@ export default function ConfiguracoesPerfilPage() {
                         <RiLockLine className="text-gray-400" />
                       </div>
                       <input
-                        type={showPassword ? "text" : "password"}
+                        type={showCurrentPassword ? "text" : "password"}
                         id="senhaAtual"
                         name="senhaAtual"
                         value={formData.senhaAtual}
                         onChange={handleChange}
-                        className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                       />
+                      <button
+                        type="button"
+                        onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                      >
+                        {showCurrentPassword ? (
+                          <RiEyeOffLine className="text-gray-400 hover:text-gray-500" />
+                        ) : (
+                          <RiEyeLine className="text-gray-400 hover:text-gray-500" />
+                        )}
+                      </button>
                     </div>
                   </div>
                   
@@ -239,13 +240,24 @@ export default function ConfiguracoesPerfilPage() {
                         <RiLockLine className="text-gray-400" />
                       </div>
                       <input
-                        type={showPassword ? "text" : "password"}
+                        type={showNewPassword ? "text" : "password"}
                         id="novaSenha"
                         name="novaSenha"
                         value={formData.novaSenha}
                         onChange={handleChange}
-                        className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                       />
+                      <button
+                        type="button"
+                        onClick={() => setShowNewPassword(!showNewPassword)}
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                      >
+                        {showNewPassword ? (
+                          <RiEyeOffLine className="text-gray-400 hover:text-gray-500" />
+                        ) : (
+                          <RiEyeLine className="text-gray-400 hover:text-gray-500" />
+                        )}
+                      </button>
                     </div>
                   </div>
                   
@@ -258,7 +270,7 @@ export default function ConfiguracoesPerfilPage() {
                         <RiLockLine className="text-gray-400" />
                       </div>
                       <input
-                        type={showPassword ? "text" : "password"}
+                        type={showConfirmPassword ? "text" : "password"}
                         id="confirmarSenha"
                         name="confirmarSenha"
                         value={formData.confirmarSenha}
@@ -267,10 +279,10 @@ export default function ConfiguracoesPerfilPage() {
                       />
                       <button
                         type="button"
-                        onClick={() => setShowPassword(!showPassword)}
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                         className="absolute inset-y-0 right-0 pr-3 flex items-center"
                       >
-                        {showPassword ? (
+                        {showConfirmPassword ? (
                           <RiEyeOffLine className="text-gray-400 hover:text-gray-500" />
                         ) : (
                           <RiEyeLine className="text-gray-400 hover:text-gray-500" />

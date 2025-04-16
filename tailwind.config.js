@@ -8,7 +8,7 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Epilogue', 'sans-serif'],
+        sans: ['var(--font-inter)', 'sans-serif'],
       },
       borderRadius: {
         'xl': '0.75rem',
