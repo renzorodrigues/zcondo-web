@@ -25,6 +25,10 @@ const nextConfig = {
       allowedOrigins: ['localhost:3000', 'zcondo-web.vercel.app'],
     },
   },
+  // Disable standalone output mode for Vercel deployment
+  output: undefined,
+  // Add transpilePackages to ensure all dependencies are properly transpiled
+  transpilePackages: ['react-icons'],
 };
 
 module.exports = nextConfig; 
