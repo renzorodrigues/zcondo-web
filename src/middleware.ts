@@ -1,35 +1,38 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-// Rotas que não precisam de autenticação
-const publicRoutes = ['/', '/login', '/register', '/forgot-password', '/terms', '/privacy'];
+// Lista de rotas públicas que não precisam de autenticação
+const publicRoutes = ['/login', '/register', '/'];
+
+// Lista de rotas protegidas que precisam de autenticação
+const protectedRoutes = ['/dashboard', '/condominios', '/usuarios', '/configuracoes'];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  
-  // Verifica se é uma rota pública
-  const isPublicRoute = publicRoutes.some(route => pathname === route);
-  
-  // Verifica se o usuário está autenticado
-  // Como o middleware roda no servidor, não podemos acessar localStorage diretamente
-  // Vamos usar um cookie para verificar a autenticação
-  const isAuthenticated = request.cookies.has('auth-token');
+  const token = request.cookies.get('auth_token')?.value;
 
-  // Se for uma rota pública e o usuário estiver autenticado, redireciona para o dashboard
-  // Exceto se for a rota raiz, que deve ser acessível mesmo autenticado
-  if (isPublicRoute && isAuthenticated && pathname !== '/') {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
+  // Verificar se a rota atual é protegida
+  const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
+  
+  // Verificar se a rota atual é pública
+  const isPublicRoute = publicRoutes.some(route => pathname === route);
+
+  // Se for uma rota protegida e não tiver token, redirecionar para login
+  if (isProtectedRoute && !token) {
+    const url = new URL('/login', request.url);
+    url.searchParams.set('redirect', pathname);
+    return NextResponse.redirect(url);
   }
 
-  // Se não for uma rota pública e o usuário não estiver autenticado, redireciona para o login
-  if (!isPublicRoute && !isAuthenticated) {
-    return NextResponse.redirect(new URL('/login', request.url));
+  // Se for uma rota pública e tiver token, redirecionar para dashboard
+  if (isPublicRoute && token && pathname !== '/') {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
   return NextResponse.next();
 }
 
-// Configuração de quais rotas o middleware deve ser executado
+// Configurar quais rotas o middleware deve ser executado
 export const config = {
   matcher: [
     /*

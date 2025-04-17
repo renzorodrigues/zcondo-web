@@ -16,6 +16,7 @@ import { FaChevronDown } from 'react-icons/fa';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
+import UserAvatar from './dashboard/components/UserAvatar';
 
 // Mock data for condominiums - in a real app, this would come from an API
 const mockCondominiums = [
@@ -169,19 +170,19 @@ export default function ProtectedLayout({
             
             {/* Right side - User Menu */}
             <div className="w-64 flex justify-end items-center pr-8">
-              <div ref={userDropdownRef}>
+              <div ref={userDropdownRef} className="relative">
                 <button 
                   onClick={toggleUserDropdown}
-                  className="flex items-center justify-center w-10 h-10 rounded-full bg-purple-100 text-purple-700 font-medium hover:bg-purple-200 transition-colors text-center"
+                  className="flex items-center space-x-2"
                 >
-                  {initials}
+                  <UserAvatar />
                 </button>
                 
                 {isUserDropdownOpen && (
-                  <div className="absolute right-8 mt-2 w-56 rounded-md shadow-lg bg-white z-10">
+                  <div className="absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white z-10">
                     <div className="py-1" role="menu" aria-orientation="vertical">
                       <div className="px-4 py-2 border-b border-gray-100">
-                        <p className="text-sm font-medium text-gray-900">{username}</p>
+                        <p className="text-sm font-medium text-gray-900">{user?.name}</p>
                         <p className="text-xs text-gray-500 truncate">{user?.email}</p>
                       </div>
                       
@@ -203,16 +204,14 @@ export default function ProtectedLayout({
                         Alterar Senha
                       </Link>
                       
-                      <div className="border-t border-gray-100">
-                        <button
-                          onClick={logout}
-                          className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                          role="menuitem"
-                        >
-                          <RiLogoutBoxLine className="mr-3 text-gray-500" />
-                          Sair
-                        </button>
-                      </div>
+                      <button
+                        onClick={logout}
+                        className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        role="menuitem"
+                      >
+                        <RiLogoutBoxLine className="mr-3 text-gray-500" />
+                        Sair
+                      </button>
                     </div>
                   </div>
                 )}

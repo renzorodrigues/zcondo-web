@@ -4,14 +4,18 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { registerService } from '@/services/auth';
+import { RegisterData } from '@/types/auth';
+import LoadingOverlay from '@/components/LoadingOverlay';
 
 export default function RegisterPage() {
   const router = useRouter();
-  const [formData, setFormData] = useState({
-    name: '',
+  const [formData, setFormData] = useState<RegisterData>({
+    firstname: '',
+    lastname: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    passwordConfirmation: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -21,18 +25,21 @@ export default function RegisterPage() {
     setLoading(true);
     setError('');
 
-    if (formData.password !== formData.confirmPassword) {
+    if (formData.password !== formData.passwordConfirmation) {
       setError('As senhas não coincidem');
       setLoading(false);
       return;
     }
 
     try {
-      // Simular registro
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      router.push('/login');
-    } catch {
-      setError('Erro ao criar conta. Tente novamente.');
+      await registerService.register(formData);
+      router.push(`/register/confirmation?email=${encodeURIComponent(formData.email)}`);
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Erro ao criar conta. Tente novamente.');
+      }
     } finally {
       setLoading(false);
     }
@@ -48,6 +55,7 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen flex">
+      <LoadingOverlay isLoading={loading} message="Criando sua conta..." />
       {/* Lado Esquerdo - Imagem */}
       <div className="hidden lg:flex w-[70%] relative bg-gradient-to-br from-purple-600 to-purple-800 overflow-hidden">
         {/* Background image with overlay */}
@@ -83,20 +91,38 @@ export default function RegisterPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                Nome completo
-              </label>
-              <input
-                id="name"
-                name="name"
-                type="text"
-                required
-                value={formData.name}
-                onChange={handleChange}
-                className="mt-1 block w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
-                placeholder="Seu nome completo"
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="firstname" className="block text-sm font-medium text-gray-700">
+                  Nome
+                </label>
+                <input
+                  id="firstname"
+                  name="firstname"
+                  type="text"
+                  required
+                  value={formData.firstname}
+                  onChange={handleChange}
+                  className="mt-1 block w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
+                  placeholder="Seu nome"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="lastname" className="block text-sm font-medium text-gray-700">
+                  Sobrenome
+                </label>
+                <input
+                  id="lastname"
+                  name="lastname"
+                  type="text"
+                  required
+                  value={formData.lastname}
+                  onChange={handleChange}
+                  className="mt-1 block w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
+                  placeholder="Seu sobrenome"
+                />
+              </div>
             </div>
 
             <div>
@@ -134,16 +160,16 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="passwordConfirmation" className="block text-sm font-medium text-gray-700">
                 Confirmar senha
               </label>
               <input
-                id="confirmPassword"
-                name="confirmPassword"
+                id="passwordConfirmation"
+                name="passwordConfirmation"
                 type="password"
                 autoComplete="new-password"
                 required
-                value={formData.confirmPassword}
+                value={formData.passwordConfirmation}
                 onChange={handleChange}
                 className="mt-1 block w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
                 placeholder="••••••••"

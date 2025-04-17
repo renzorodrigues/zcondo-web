@@ -1,19 +1,22 @@
 'use client';
 
 import { useState } from 'react';
-import { useAuth } from '@/hooks/useAuth';
 import { FcGoogle } from 'react-icons/fc';
 import { FaFacebook, FaEye, FaEyeSlash } from 'react-icons/fa';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { loginService } from '@/services/auth';
+import LoadingOverlay from '@/components/LoadingOverlay';
 
 export default function LoginPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,10 +24,18 @@ export default function LoginPage() {
     setError('');
 
     try {
-      await login(email, password);
+      await loginService.login({
+        username: email,
+        password
+      });
+      router.push('/dashboard');
     } catch (err) {
       console.error('Erro ao fazer login:', err);
-      setError('Email ou senha inválidos');
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Email ou senha inválidos');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -32,6 +43,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex">
+      <LoadingOverlay isLoading={isLoading} message="Autenticando..." />
       {/* Lado Esquerdo - Imagem */}
       <div className="hidden lg:flex w-[70%] relative bg-gradient-to-br from-purple-600 to-purple-800 overflow-hidden">
         {/* Background image with overlay */}
@@ -65,6 +77,12 @@ export default function LoginPage() {
               Entre com suas credenciais
             </p>
           </div>
+
+          {searchParams?.get('registered') && (
+            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
+              Conta criada com sucesso! Faça login para continuar.
+            </div>
+          )}
 
           {/* Botões de Login Social */}
           <div className="space-y-3">
