@@ -1,11 +1,12 @@
 import { TokenData } from '@/types/auth';
+import { api } from '../api';
 import Cookies from 'js-cookie';
 
 class TokenService {
   private static instance: TokenService;
-  private readonly TOKEN_KEY = 'auth_token';
-  private readonly REFRESH_TOKEN_KEY = 'refresh_token';
   private readonly TOKEN_EXPIRY_KEY = 'token_expiry';
+  private readonly ACCESS_TOKEN_TTL = 5 * 60 * 1000; // 5 minutes in milliseconds
+  private accessToken: string | null = null;
 
   private constructor() {}
 
@@ -16,39 +17,56 @@ class TokenService {
     return TokenService.instance;
   }
 
-  public setTokens(tokenData: TokenData): void {
-    // Calculate expiry time
-    const expiryTime = Date.now() + tokenData.expires_in * 1000;
-    
-    // Store tokens in cookies
-    Cookies.set(this.TOKEN_KEY, tokenData.access_token, { expires: 7 }); // 7 days
-    Cookies.set(this.REFRESH_TOKEN_KEY, tokenData.refresh_token, { expires: 30 }); // 30 days
-    Cookies.set(this.TOKEN_EXPIRY_KEY, expiryTime.toString(), { expires: 7 }); // 7 days
+  public setTokens(tokenData: TokenData): string {
+    // Calculate and store expiry time
+    const expiryTime = Date.now() + this.ACCESS_TOKEN_TTL;
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(this.TOKEN_EXPIRY_KEY, expiryTime.toString());
+    }
+
+    // Store access token in memory
+    this.accessToken = tokenData.access_token;
+    return tokenData.access_token;
   }
 
-  public getToken(): string | null {
-    return Cookies.get(this.TOKEN_KEY) || null;
-  }
-
-  public getRefreshToken(): string | null {
-    return Cookies.get(this.REFRESH_TOKEN_KEY) || null;
+  public getAccessToken(): string | null {
+    return this.accessToken;
   }
 
   public isTokenExpired(): boolean {
-    const expiryTime = this.getTokenExpiryTime();
+    if (typeof window === 'undefined') return true;
+    const expiryTime = localStorage.getItem(this.TOKEN_EXPIRY_KEY);
     if (!expiryTime) return true;
-    return Date.now() >= expiryTime;
+    return Date.now() >= parseInt(expiryTime, 10);
   }
 
   public clearTokens(): void {
-    Cookies.remove(this.TOKEN_KEY);
-    Cookies.remove(this.REFRESH_TOKEN_KEY);
-    Cookies.remove(this.TOKEN_EXPIRY_KEY);
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(this.TOKEN_EXPIRY_KEY);
+    }
+    this.accessToken = null;
   }
 
-  private getTokenExpiryTime(): number | null {
-    const expiryTime = Cookies.get(this.TOKEN_EXPIRY_KEY);
-    return expiryTime ? parseInt(expiryTime, 10) : null;
+  public async refreshAccessToken(): Promise<string | null> {
+    const refreshToken = Cookies.get('refresh_token');
+    if (!refreshToken) return null;
+
+    try {
+      const response = await api.post<{ data: TokenData }>('/Authentication/refresh', {
+        refresh_token: refreshToken
+      });
+
+      if (!response.data.data.access_token) {
+        this.clearTokens();
+        return null;
+      }
+
+      return this.setTokens(response.data.data);
+    } catch (error) {
+      console.error('Error refreshing token:', error);
+      this.clearTokens();
+      return null;
+    }
   }
 }
 

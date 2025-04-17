@@ -5,13 +5,13 @@ import { FcGoogle } from 'react-icons/fc';
 import { FaFacebook, FaEye, FaEyeSlash } from 'react-icons/fa';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { loginService } from '@/services/auth';
+import { useSearchParams } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
 import LoadingOverlay from '@/components/LoadingOverlay';
 
 export default function LoginPage() {
-  const router = useRouter();
   const searchParams = useSearchParams();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -24,11 +24,7 @@ export default function LoginPage() {
     setError('');
 
     try {
-      await loginService.login({
-        username: email,
-        password
-      });
-      router.push('/dashboard');
+      await login(email, password);
     } catch (err) {
       console.error('Erro ao fazer login:', err);
       if (err instanceof Error) {

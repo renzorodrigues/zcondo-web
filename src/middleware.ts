@@ -9,7 +9,8 @@ const protectedRoutes = ['/dashboard', '/condominios', '/usuarios', '/configurac
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const token = request.cookies.get('auth_token')?.value;
+  const refreshToken = request.cookies.get('refresh_token')?.value;
+  const userData = request.cookies.get('user_data')?.value;
 
   // Verificar se a rota atual é protegida
   const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
@@ -17,15 +18,15 @@ export function middleware(request: NextRequest) {
   // Verificar se a rota atual é pública
   const isPublicRoute = publicRoutes.some(route => pathname === route);
 
-  // Se for uma rota protegida e não tiver token, redirecionar para login
-  if (isProtectedRoute && !token) {
+  // Se for uma rota protegida e não tiver token ou dados do usuário, redirecionar para login
+  if (isProtectedRoute && (!refreshToken || !userData)) {
     const url = new URL('/login', request.url);
     url.searchParams.set('redirect', pathname);
     return NextResponse.redirect(url);
   }
 
-  // Se for uma rota pública e tiver token, redirecionar para dashboard
-  if (isPublicRoute && token && pathname !== '/') {
+  // Se for uma rota pública e tiver token e dados do usuário, redirecionar para dashboard
+  if (isPublicRoute && refreshToken && userData && pathname !== '/') {
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 

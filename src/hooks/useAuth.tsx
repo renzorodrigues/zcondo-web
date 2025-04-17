@@ -8,17 +8,23 @@ import { UserData } from '@/types/auth';
 interface AuthContextType {
   isAuthenticated: boolean;
   user: UserData | null;
+  accessToken: string | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
-  loading: boolean;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType>({
+  isAuthenticated: false,
+  user: null,
+  accessToken: null,
+  login: async () => {},
+  logout: () => {},
+});
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<UserData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -44,8 +50,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.error('Erro ao verificar autenticação:', error);
         setIsAuthenticated(false);
         setUser(null);
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -54,18 +58,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string) => {
     try {
-      await loginService.login({ username: email, password });
+      const { tokenData, userData } = await loginService.login({ username: email, password });
       setIsAuthenticated(true);
-      
-      const userData = loginService.getUserData();
-      console.log('Login bem-sucedido para:', userData);
       setUser(userData);
-      
+      setAccessToken(tokenData.access_token);
       router.push('/dashboard');
     } catch (error) {
       console.error('Erro no login:', error);
       setIsAuthenticated(false);
       setUser(null);
+      setAccessToken(null);
       if (error instanceof Error) {
         throw error;
       }
@@ -77,11 +79,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     loginService.logout();
     setIsAuthenticated(false);
     setUser(null);
+    setAccessToken(null);
     router.push('/login');
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, login, logout, loading }}>
+    <AuthContext.Provider value={{ isAuthenticated, user, accessToken, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
