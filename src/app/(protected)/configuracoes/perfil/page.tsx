@@ -170,7 +170,6 @@ export default function ConfiguracoesPerfilPage() {
                         value={formData.email}
                         onChange={handleChange}
                         className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                        placeholder="seu.email@exemplo.com"
                       />
                     </div>
                   </div>

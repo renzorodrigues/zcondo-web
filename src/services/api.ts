@@ -1,25 +1,38 @@
 import axios from 'axios';
 import { tokenService } from './auth/token.service';
+import { UserData } from '@/types/auth';
 
-// Create an axios instance with default config
+interface ApiResponse<T> {
+  data: T;
+}
+
+interface LoginResponse {
+  data: {
+    token: {
+      access_token: string;
+      expires_in: number;
+      refresh_token: string;
+    };
+    user: UserData;
+  };
+}
+
+// Configuração base da API
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1',
+  withCredentials: true,
   headers: {
-    'Content-Type': 'application/json',
-  },
+    'Content-Type': 'application/json'
+  }
 });
 
-// Add a request interceptor to add the auth token to requests
+// Interceptor para adicionar o token em todas as requisições
 api.interceptors.request.use(
-  async (config) => {
-    // Get the token from tokenService
+  (config) => {
     const token = tokenService.getAccessToken();
-    
-    // If the token exists, add it to the headers
-    if (token && config.headers) {
+    if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    
     return config;
   },
   (error) => {
@@ -27,35 +40,32 @@ api.interceptors.request.use(
   }
 );
 
-// Add a response interceptor to handle errors
+// Interceptor para tratar erros de autenticação
 api.interceptors.response.use(
-  (response) => {
-    return response;
-  },
+  (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    // Handle 401 Unauthorized errors (token expired or invalid)
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Se o erro for 401 e não for uma tentativa de refresh
+    if (error.response?.status === 401 && !originalRequest._retry && !originalRequest.url?.includes('/Authentication/refresh')) {
       originalRequest._retry = true;
 
       try {
-        // Try to refresh the token
+        // Tenta atualizar o token
         const newToken = await tokenService.refreshAccessToken();
-        
         if (newToken) {
-          // Update the authorization header
+          // Atualiza o header da requisição original
           originalRequest.headers.Authorization = `Bearer ${newToken}`;
-          // Retry the original request
+          // Repete a requisição original
           return api(originalRequest);
         }
       } catch (refreshError) {
-        // If refresh fails, clear tokens and redirect to login
-        tokenService.clearTokens();
+        console.error('Erro ao tentar refresh token:', refreshError);
+        // Se falhar o refresh, redireciona para o login
         window.location.href = '/login';
       }
     }
-    
+
     return Promise.reject(error);
   }
 );
@@ -63,18 +73,31 @@ api.interceptors.response.use(
 // API methods
 export const apiService = {
   // Auth
-  login: (email: string, password: string) => 
-    api.post<{ token: string; user: Record<string, unknown> }>('/Authentication/login', { email, password }),
+  login: (username: string, password: string) => 
+    api.post<LoginResponse>('/Authentication/login', { username, password }),
   
-  register: (userData: Record<string, unknown>) => 
-    api.post<{ token: string; user: Record<string, unknown> }>('/Authentication/register', userData),
+  register: (userData: UserData) => 
+    api.post('/Authentication/register', userData),
+  
+  logout: () => 
+    api.post('/Authentication/logout', null, {
+      withCredentials: true,
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }),
+  
+  refresh: () => 
+    api.post('/Authentication/refresh', null, {
+      withCredentials: true
+    }),
   
   // User
   getProfile: () => 
-    api.get<Record<string, unknown>>('/User/profile'),
+    api.get<ApiResponse<UserData>>('/User/profile'),
   
-  updateProfile: (userData: Record<string, unknown>) => 
-    api.put<Record<string, unknown>>('/User/profile', userData),
+  updateProfile: (userData: UserData) => 
+    api.put('/User/profile', userData),
   
   // Add more API methods as needed
 };

@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useAuth } from '@/hooks/useAuth';
 import { 
   RiHome4Line,
   RiLogoutBoxLine,
@@ -17,9 +16,15 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import UserAvatar from './dashboard/components/UserAvatar';
+import { useAuth } from '@/hooks/useAuth';
+
+interface Condominium {
+  id: number;
+  name: string;
+}
 
 // Mock data for condominiums - in a real app, this would come from an API
-const mockCondominiums = [
+const mockCondominiums: Condominium[] = [
   { id: 1, name: 'Residencial Parque Verde' },
   { id: 2, name: 'Edifício Central' },
   { id: 3, name: 'Condomínio Solar' },
@@ -31,23 +36,21 @@ export default function ProtectedLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user, logout } = useAuth();
   const pathname = usePathname() || '';
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [selectedCondominium, setSelectedCondominium] = useState(mockCondominiums[0]);
+  const [selectedCondominium, setSelectedCondominium] = useState<Condominium | null>(null);
   const [isCondominiumDropdownOpen, setIsCondominiumDropdownOpen] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const isDashboard = pathname === '/dashboard';
+  const { logout } = useAuth();
   
   // Refs para os dropdowns
   const condominiumDropdownRef = useRef<HTMLDivElement>(null);
   const userDropdownRef = useRef<HTMLDivElement>(null);
 
   // Get username from email (part before @)
-  const username = user?.email ? user.email.split('@')[0] : '';
   
   // Get initials for avatar
-  const initials = username ? username.substring(0, 2).toUpperCase() : '';
 
   // Load selected condominium from localStorage on mount
   useEffect(() => {
@@ -115,6 +118,11 @@ export default function ProtectedLayout({
     setIsUserDropdownOpen(!isUserDropdownOpen);
   };
 
+  const handleLogout = async () => {
+    await logout();
+    setIsUserDropdownOpen(false);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -142,7 +150,7 @@ export default function ProtectedLayout({
                     className="flex items-center space-x-2 px-3 py-2 rounded-md bg-purple-50 hover:bg-purple-100 transition-colors"
                   >
                     <RiBuilding2Line className="text-purple-600" />
-                    <span className="text-sm font-medium text-gray-700">{selectedCondominium.name}</span>
+                    <span className="text-sm font-medium text-gray-700">{selectedCondominium?.name}</span>
                     <FaChevronDown className="text-gray-500 text-xs" />
                   </button>
                   
@@ -154,7 +162,7 @@ export default function ProtectedLayout({
                             key={condominium.id}
                             onClick={() => handleCondominiumSelect(condominium)}
                             className={`${
-                              selectedCondominium.id === condominium.id ? 'bg-purple-50 text-purple-700' : 'text-gray-700'
+                              selectedCondominium?.id === condominium.id ? 'bg-purple-50 text-purple-700' : 'text-gray-700'
                             } block w-full text-left px-4 py-2 text-sm hover:bg-gray-100`}
                             role="menuitem"
                           >
@@ -182,8 +190,6 @@ export default function ProtectedLayout({
                   <div className="absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white z-10">
                     <div className="py-1" role="menu" aria-orientation="vertical">
                       <div className="px-4 py-2 border-b border-gray-100">
-                        <p className="text-sm font-medium text-gray-900">{user?.name}</p>
-                        <p className="text-xs text-gray-500 truncate">{user?.email}</p>
                       </div>
                       
                       <Link 
@@ -205,7 +211,7 @@ export default function ProtectedLayout({
                       </Link>
                       
                       <button
-                        onClick={logout}
+                        onClick={handleLogout}
                         className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                         role="menuitem"
                       >

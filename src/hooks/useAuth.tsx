@@ -1,99 +1,191 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
-import { loginService } from '@/services/auth';
+import { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import { loginService } from '@/services/auth/login.service';
+import { tokenService } from '@/services/auth/token.service';
 import { UserData } from '@/types/auth';
 
 interface AuthContextType {
   isAuthenticated: boolean;
   user: UserData | null;
-  accessToken: string | null;
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
+  login: (username: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
+  isLoading: boolean;
 }
 
-export const AuthContext = createContext<AuthContextType>({
+const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
   user: null,
-  accessToken: null,
   login: async () => {},
-  logout: () => {},
+  logout: async () => {},
+  isLoading: true,
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState<UserData | null>(null);
-  const [accessToken, setAccessToken] = useState<string | null>(null);
   const router = useRouter();
-  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const pathname = usePathname() || '';
+  const [user, setUser] = useState<UserData | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const isAuth = await loginService.isAuthenticated();
-        console.log('Status de autenticação:', isAuth);
-        setIsAuthenticated(isAuth);
-        
-        if (isAuth) {
-          const userData = loginService.getUserData();
-          console.log('Dados do usuário:', userData);
-          setUser(userData);
-          
-          if (pathname === '/login') {
-            router.push('/dashboard');
+  const bootstrapAuth = async () => {
+    try {
+      // Evita múltiplos refreshes simultâneos
+      if (isRefreshing) {
+        return;
+      }
+
+      const token = tokenService.getAccessToken();
+
+      if (token) {
+        if (!tokenService.isTokenExpired()) {
+          const decodedUser = tokenService.decodeToken(token);
+          if (decodedUser) {
+            setUser(decodedUser);
+            setIsAuthenticated(true);
           }
         } else {
-          setUser(null);
+          setIsRefreshing(true);
+          const newToken = await tokenService.refreshAccessToken();
+          if (newToken) {
+            const decodedUser = tokenService.decodeToken(newToken);
+            if (decodedUser) {
+              setUser(decodedUser);
+              setIsAuthenticated(true);
+            }
+          } else {
+            setUser(null);
+            setIsAuthenticated(false);
+          }
+          setIsRefreshing(false);
         }
-      } catch (error) {
-        console.error('Erro ao verificar autenticação:', error);
-        setIsAuthenticated(false);
+      } else {
+        // Se não temos token, não tentamos refresh
         setUser(null);
+        setIsAuthenticated(false);
       }
-    };
-
-    checkAuth();
-  }, [router, pathname]);
-
-  const login = async (email: string, password: string) => {
-    try {
-      const { tokenData, userData } = await loginService.login({ username: email, password });
-      setIsAuthenticated(true);
-      setUser(userData);
-      setAccessToken(tokenData.access_token);
-      router.push('/dashboard');
     } catch (error) {
-      console.error('Erro no login:', error);
-      setIsAuthenticated(false);
+      console.error('Error during auth bootstrap:', error);
       setUser(null);
-      setAccessToken(null);
-      if (error instanceof Error) {
-        throw error;
-      }
-      throw new Error('Falha na autenticação');
+      setIsAuthenticated(false);
+      setIsRefreshing(false);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const logout = () => {
-    loginService.logout();
-    setIsAuthenticated(false);
-    setUser(null);
-    setAccessToken(null);
-    router.push('/login');
+  // Bootstrap auth apenas na montagem do componente
+  useEffect(() => {
+    bootstrapAuth();
+  }, []);
+
+  // Efeito para verificar o token quando o pathname mudar
+  useEffect(() => {
+    // Verifica se o token existe e está válido quando o pathname mudar
+    const token = tokenService.getAccessToken();
+    if (token && !tokenService.isTokenExpired()) {
+      const decodedUser = tokenService.decodeToken(token);
+      if (decodedUser && !user) {
+        setUser(decodedUser);
+        setIsAuthenticated(true);
+      }
+    }
+  }, [pathname, user]);
+
+  // Efeito para lidar com redirecionamentos baseado no estado de autenticação
+  useEffect(() => {
+    if (!isLoading) {
+      if (isAuthenticated) {
+        // Se estiver autenticado e tentar acessar uma rota pública, redireciona para o dashboard
+        if (pathname === '/login' || pathname === '/register' || pathname === '/' || pathname === '/landing') {
+          // Realiza o refresh do token antes de redirecionar
+          tokenService.refreshAccessToken().then(() => {
+            router.replace('/dashboard');
+          });
+        }
+      } else {
+        if (!pathname.startsWith('/login') && !pathname.startsWith('/register') && !pathname.startsWith('/landing') && pathname !== '/') {
+          const redirectUrl = `/login?redirect=${encodeURIComponent(pathname)}`;
+          router.replace(redirectUrl);
+        }
+      }
+    }
+  }, [isAuthenticated, isLoading, pathname, router, searchParams]);
+
+  // Efeito para atualizar o estado quando o token mudar
+  useEffect(() => {
+    const handleStorageChange = () => {
+      bootstrapAuth();
+    };
+
+    const handleTokenUpdate = (event: MessageEvent) => {
+      if (event.data.type === 'TOKEN_UPDATE') {
+        if (event.data.token) {
+          const decodedUser = tokenService.decodeToken(event.data.token);
+          if (decodedUser) {
+            setUser(decodedUser);
+            setIsAuthenticated(true);
+          }
+        } else {
+          setUser(null);
+          setIsAuthenticated(false);
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    const channel = new BroadcastChannel('auth');
+    channel.addEventListener('message', handleTokenUpdate);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      channel.removeEventListener('message', handleTokenUpdate);
+      channel.close();
+    };
+  }, []);
+
+  const login = async (username: string, password: string) => {
+    const result = await loginService.login(username, password);
+
+    if (!result.access_token) {
+      throw new Error('No access token received');
+    }
+
+    const decodedUser = tokenService.decodeToken(result.access_token);
+    if (decodedUser) {
+      setUser(decodedUser);
+      setIsAuthenticated(true);
+    }
+  };
+
+  const logout = async () => {
+    try {
+      setUser(null);
+      setIsAuthenticated(false);
+      await loginService.logout();
+      router.replace('/');
+    } catch (error) {
+      console.error('Error during logout:', error);
+      setUser(null);
+      setIsAuthenticated(false);
+      router.replace('/');
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, accessToken, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, user, login, logout, isLoading }}>
       {children}
     </AuthContext.Provider>
   );
 }
 
-export function useAuth() {
+export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-} 
+}; 

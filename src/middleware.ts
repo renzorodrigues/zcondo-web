@@ -1,48 +1,37 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-// Lista de rotas públicas que não precisam de autenticação
-const publicRoutes = ['/login', '/register', '/'];
-
-// Lista de rotas protegidas que precisam de autenticação
-const protectedRoutes = ['/dashboard', '/condominios', '/usuarios', '/configuracoes'];
+// Lista de rotas públicas que não requerem autenticação
+const publicRoutes = ['/', '/login', '/register', '/landing'];
 
 export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-  const refreshToken = request.cookies.get('refresh_token')?.value;
-  const userData = request.cookies.get('user_data')?.value;
-
-  // Verificar se a rota atual é protegida
-  const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
+  const pathname = request.nextUrl.pathname;
+  const isPublicRoute = publicRoutes.includes(pathname);
   
-  // Verificar se a rota atual é pública
-  const isPublicRoute = publicRoutes.some(route => pathname === route);
+  // Verifica o refresh token no cookie
+  const refreshToken = request.cookies.get('refresh_token')?.value;
 
-  // Se for uma rota protegida e não tiver token ou dados do usuário, redirecionar para login
-  if (isProtectedRoute && (!refreshToken || !userData)) {
-    const url = new URL('/login', request.url);
-    url.searchParams.set('redirect', pathname);
-    return NextResponse.redirect(url);
+  // Se não estiver autenticado e tentar acessar uma rota protegida
+  if (!refreshToken && !isPublicRoute) {
+    const redirectUrl = new URL('/login', request.url);
+    redirectUrl.searchParams.set('redirect', pathname);
+    return NextResponse.redirect(redirectUrl);
   }
 
-  // Se for uma rota pública e tiver token e dados do usuário, redirecionar para dashboard
-  if (isPublicRoute && refreshToken && userData && pathname !== '/') {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
+  // Se estiver autenticado e tentar acessar uma rota pública, redireciona para o dashboard
+  if (refreshToken && isPublicRoute) {
+    // Realiza o refresh do token antes de redirecionar
+    const response = NextResponse.redirect(new URL('/dashboard', request.url));
+    
+    // Adiciona um header personalizado para indicar que o token deve ser atualizado
+    response.headers.set('x-refresh-token', 'true');
+    
+    return response;
   }
 
   return NextResponse.next();
 }
 
-// Configurar quais rotas o middleware deve ser executado
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     */
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
-  ],
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
 }; 
