@@ -1,20 +1,20 @@
 import { api } from '@/services/api';
-import { TokenData, UserData } from '@/types/auth';
+
+interface TokenData {
+  access_token: string;
+  refresh_token?: string;
+  expires_in: number;
+}
 
 class TokenService {
   private static instance: TokenService;
   private accessToken: string | null = null;
-  private accessTokenExpiration: number | null = null;
+  private expiresAt: number | null = null;
   private channel: BroadcastChannel;
 
   private constructor() {
     this.channel = new BroadcastChannel('auth');
-    this.channel.onmessage = (event) => {
-      if (event.data.type === 'TOKEN_UPDATE') {
-        this.accessToken = event.data.token;
-        this.accessTokenExpiration = event.data.expiration;
-      }
-    };
+    this.channel.addEventListener('message', this.handleTokenUpdate);
   }
 
   public static getInstance(): TokenService {
@@ -24,99 +24,62 @@ class TokenService {
     return TokenService.instance;
   }
 
+  private handleTokenUpdate = (event: MessageEvent) => {
+    if (event.data.type === 'TOKEN_UPDATE') {
+      this.accessToken = event.data.token;
+      this.expiresAt = event.data.expiresAt;
+    }
+  };
+
+  public setTokens(data: TokenData): void {
+    this.accessToken = data.access_token;
+    this.expiresAt = Date.now() + data.expires_in * 1000;
+
+    // Notifica outras abas sobre a atualização do token
+    this.channel.postMessage({
+      type: 'TOKEN_UPDATE',
+      token: data.access_token,
+      expiresAt: this.expiresAt
+    });
+  }
+
   public getAccessToken(): string | null {
     return this.accessToken;
   }
 
-  public setTokens(tokenData: TokenData): void {
-    this.accessToken = tokenData.access_token;
-    this.accessTokenExpiration = Date.now() + (tokenData.expires_in * 1000);
-    
-    // Notifica outras abas sobre a atualização do token
-    this.channel.postMessage({
-      type: 'TOKEN_UPDATE',
-      token: this.accessToken,
-      expiration: this.accessTokenExpiration
-    });
-  }
-
   public isTokenExpired(): boolean {
-    if (!this.accessToken || !this.accessTokenExpiration) {
-      return true;
-    }
-    return Date.now() >= this.accessTokenExpiration;
-  }
-
-  private removeRefreshTokenCookie(): void {
-    // Remove o cookie em todos os domínios e paths possíveis
-    const domains = [
-      '', // sem domínio
-      'localhost',
-      window.location.hostname
-    ];
-    
-    const paths = [
-      '/',
-      '/api',
-      ''
-    ];
-
-    domains.forEach(domain => {
-      paths.forEach(path => {
-        document.cookie = `refresh_token=; Path=${path}; Expires=Thu, 01 Jan 1970 00:00:01 GMT${domain ? `; Domain=${domain}` : ''}`;
-      });
-    });
-  }
-
-  public clearTokens(): void {
-    this.accessToken = null;
-    this.accessTokenExpiration = null;
-    
-    // Remove o cookie de refresh token
-    this.removeRefreshTokenCookie();
-    
-    // Notifica outras abas
-    this.channel.postMessage({
-      type: 'TOKEN_UPDATE',
-      token: null,
-      expiration: null
-    });
+    if (!this.expiresAt) return true;
+    return Date.now() >= this.expiresAt;
   }
 
   public async refreshAccessToken(): Promise<string | null> {
     try {
-      const response = await api.post('/Authentication/refresh', null, { 
-        withCredentials: true 
+      const response = await api.post('/Authentication/refresh', null, {
+        withCredentials: true
       });
 
-      if (response.data?.access_token) {
-        this.setTokens({
-          access_token: response.data.access_token,
-          refresh_token: response.data.refresh_token,
-          expires_in: response.data.expires_in || 300
-        });
-        return response.data.access_token;
+      if (response.data?.data?.token?.access_token) {
+        const { access_token, expires_in } = response.data.data.token;
+        this.setTokens({ access_token, expires_in });
+        return access_token;
       }
       return null;
-    } catch {
-      // Se falhar o refresh, limpa todos os tokens
-      this.clearTokens();
+    } catch (error) {
+      console.error('Error refreshing token:', error);
       return null;
     }
   }
 
-  public decodeToken(token: string): UserData | null {
-    try {
-      const base64Url = token.split('.')[1];
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-      }).join(''));
+  public clearTokens(): void {
+    this.accessToken = null;
+    this.expiresAt = null;
 
-      return JSON.parse(jsonPayload);
-    } catch {
-      return null;
-    }
+    // Notifica outras abas que os tokens foram limpos
+    this.channel.postMessage({
+      type: 'TOKEN_UPDATE',
+      token: null,
+      expiresAt: null
+    });
   }
 }
 

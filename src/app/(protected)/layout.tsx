@@ -62,6 +62,25 @@ export default function ProtectedLayout({
         setSelectedCondominium(condominium);
       }
     }
+
+    // Listen for condominium changes from other tabs
+    const channel = new BroadcastChannel('condominium');
+    const handleCondominiumChange = (event: MessageEvent) => {
+      if (event.data.type === 'CONDOMINIUM_CHANGED') {
+        const id = event.data.condominiumId;
+        const condominium = mockCondominiums.find(c => c.id === id);
+        if (condominium) {
+          setSelectedCondominium(condominium);
+        }
+      }
+    };
+    
+    channel.addEventListener('message', handleCondominiumChange);
+    
+    return () => {
+      channel.removeEventListener('message', handleCondominiumChange);
+      channel.close();
+    };
   }, []);
 
   // Handle clicks outside of dropdowns
@@ -110,8 +129,12 @@ export default function ProtectedLayout({
     // Store the selected condominium ID in localStorage
     localStorage.setItem('selectedCondominiumId', condominium.id.toString());
     
-    // Dispatch a storage event to notify other components
-    window.dispatchEvent(new Event('storage'));
+    // Notify other components about the condominium change
+    const channel = new BroadcastChannel('condominium');
+    channel.postMessage({
+      type: 'CONDOMINIUM_CHANGED',
+      condominiumId: condominium.id
+    });
   };
 
   const toggleUserDropdown = () => {

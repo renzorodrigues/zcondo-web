@@ -6,6 +6,11 @@ export interface RegisterData {
   passwordConfirmation: string;
 }
 
+export interface AuthResponse {
+  success: boolean;
+  message: string;
+}
+
 export interface LoginData {
   username: string;
   password: string;

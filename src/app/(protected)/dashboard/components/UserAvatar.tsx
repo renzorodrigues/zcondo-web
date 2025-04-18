@@ -11,7 +11,6 @@ export default function UserAvatar() {
         {user?.name?.charAt(0).toUpperCase() || 'U'}
       </div>
       <div className="text-sm">
-        <p className="font-medium text-gray-700">{user?.name || 'Usuário'}</p>
         <p className="text-gray-500">{user?.email}</p>
       </div>
     </div>

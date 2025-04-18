@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { loginService } from '@/services/auth/login.service';
 import { tokenService } from '@/services/auth/token.service';
@@ -29,71 +29,70 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserData | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const bootstrapAuth = async () => {
+  // Bootstrap auth function
+  const bootstrapAuth = useCallback(async () => {
     try {
-      // Evita múltiplos refreshes simultâneos
-      if (isRefreshing) {
+      const token = tokenService.getAccessToken();
+      
+      if (!token) {
+        setUser(null);
+        setIsAuthenticated(false);
+        setIsLoading(false);
         return;
       }
 
-      const token = tokenService.getAccessToken();
-
-      if (token) {
-        if (!tokenService.isTokenExpired()) {
-          const decodedUser = tokenService.decodeToken(token);
-          if (decodedUser) {
-            setUser(decodedUser);
-            setIsAuthenticated(true);
-          }
-        } else {
-          setIsRefreshing(true);
-          const newToken = await tokenService.refreshAccessToken();
-          if (newToken) {
-            const decodedUser = tokenService.decodeToken(newToken);
-            if (decodedUser) {
-              setUser(decodedUser);
-              setIsAuthenticated(true);
-            }
-          } else {
-            setUser(null);
-            setIsAuthenticated(false);
-          }
-          setIsRefreshing(false);
+      // Se o token expirou, tenta renovar
+      if (tokenService.isTokenExpired()) {
+        const newToken = await tokenService.refreshAccessToken();
+        if (!newToken) {
+          setUser(null);
+          setIsAuthenticated(false);
+          setIsLoading(false);
+          return;
         }
-      } else {
-        // Se não temos token, não tentamos refresh
-        setUser(null);
-        setIsAuthenticated(false);
       }
+
+      // Se chegou aqui, temos um token válido
+      setIsAuthenticated(true);
+      setIsLoading(false);
     } catch (error) {
-      console.error('Error during auth bootstrap:', error);
+      console.error('Error during bootstrap:', error);
       setUser(null);
       setIsAuthenticated(false);
-      setIsRefreshing(false);
-    } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  // Bootstrap auth apenas na montagem do componente
+  // Bootstrap auth state
   useEffect(() => {
     bootstrapAuth();
-  }, []);
+  }, [bootstrapAuth]);
+
+  // Listen for storage events
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      // Ignore changes from condominium selection
+      if (e.key === 'selectedCondominiumId') return;
+      
+      bootstrapAuth();
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [bootstrapAuth]);
 
   // Efeito para verificar o token quando o pathname mudar
   useEffect(() => {
     // Verifica se o token existe e está válido quando o pathname mudar
     const token = tokenService.getAccessToken();
     if (token && !tokenService.isTokenExpired()) {
-      const decodedUser = tokenService.decodeToken(token);
-      if (decodedUser && !user) {
-        setUser(decodedUser);
+      // Se o token é válido, mantém o usuário autenticado
+      if (!isAuthenticated) {
         setIsAuthenticated(true);
       }
     }
-  }, [pathname, user]);
+  }, [pathname, user, isAuthenticated]);
 
   // Efeito para lidar com redirecionamentos baseado no estado de autenticação
   useEffect(() => {
@@ -103,6 +102,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (pathname === '/login' || pathname === '/register' || pathname === '/' || pathname === '/landing') {
           // Realiza o refresh do token antes de redirecionar
           tokenService.refreshAccessToken().then(() => {
+            // Não limpa o estado do usuário durante o redirecionamento
             router.replace('/dashboard');
           });
         }
@@ -115,36 +115,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [isAuthenticated, isLoading, pathname, router, searchParams]);
 
-  // Efeito para atualizar o estado quando o token mudar
+  // Efeito para carregar as informações do usuário do localStorage
   useEffect(() => {
-    const handleStorageChange = () => {
-      bootstrapAuth();
-    };
-
-    const handleTokenUpdate = (event: MessageEvent) => {
-      if (event.data.type === 'TOKEN_UPDATE') {
-        if (event.data.token) {
-          const decodedUser = tokenService.decodeToken(event.data.token);
-          if (decodedUser) {
-            setUser(decodedUser);
-            setIsAuthenticated(true);
-          }
-        } else {
-          setUser(null);
-          setIsAuthenticated(false);
-        }
+    // Tenta carregar as informações do usuário do localStorage
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      try {
+        const userData = JSON.parse(storedUser);
+        setUser(userData);
+        setIsAuthenticated(true);
+      } catch (error) {
+        console.error('Error parsing stored user data:', error);
+        localStorage.removeItem('user');
       }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    const channel = new BroadcastChannel('auth');
-    channel.addEventListener('message', handleTokenUpdate);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      channel.removeEventListener('message', handleTokenUpdate);
-      channel.close();
-    };
+    }
   }, []);
 
   const login = async (username: string, password: string) => {
@@ -154,23 +138,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw new Error('No access token received');
     }
 
-    const decodedUser = tokenService.decodeToken(result.access_token);
-    if (decodedUser) {
-      setUser(decodedUser);
+    // Usar diretamente as informações do usuário da resposta da API
+    if (result.user) {
+      // Armazena as informações do usuário no estado
+      setUser(result.user);
       setIsAuthenticated(true);
+      
+      // Armazena as informações do usuário no localStorage para persistência
+      localStorage.setItem('user', JSON.stringify(result.user));
     }
   };
 
   const logout = async () => {
     try {
+      // Limpa as informações do usuário do estado e do localStorage
       setUser(null);
       setIsAuthenticated(false);
+      localStorage.removeItem('user');
+      
+      // Chama a API de logout
       await loginService.logout();
       router.replace('/');
     } catch (error) {
       console.error('Error during logout:', error);
+      // Mesmo em caso de erro, garante que os tokens estejam limpos
       setUser(null);
       setIsAuthenticated(false);
+      localStorage.removeItem('user');
       router.replace('/');
     }
   };
