@@ -1,7 +1,7 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
-import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback, Suspense } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import { loginService } from '@/services/auth/login.service';
 import { tokenService } from '@/services/auth/token.service';
 import { UserData } from '@/types/auth';
@@ -22,9 +22,8 @@ const AuthContext = createContext<AuthContextType>({
   isLoading: true,
 });
 
-export function AuthProvider({ children }: { children: ReactNode }) {
+function AuthProviderContent({ children }: { children: ReactNode }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const pathname = usePathname() || '';
   const [user, setUser] = useState<UserData | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -113,7 +112,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       }
     }
-  }, [isAuthenticated, isLoading, pathname, router, searchParams]);
+  }, [isAuthenticated, isLoading, pathname, router]);
 
   // Efeito para carregar as informações do usuário do localStorage
   useEffect(() => {
@@ -173,6 +172,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider value={{ isAuthenticated, user, login, logout, isLoading }}>
       {children}
     </AuthContext.Provider>
+  );
+}
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <AuthProviderContent>{children}</AuthProviderContent>
+    </Suspense>
   );
 }
 
