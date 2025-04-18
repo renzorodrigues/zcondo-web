@@ -143,6 +143,11 @@ export default function DashboardPage() {
     if (storedId) {
       const id = parseInt(storedId, 10);
       setSelectedCondominiumId(id);
+    } else {
+      // Se não houver condomínio selecionado, seleciona o primeiro por padrão
+      const defaultId = 1;
+      setSelectedCondominiumId(defaultId);
+      localStorage.setItem('selectedCondominiumId', defaultId.toString());
     }
   }, []);
 
@@ -150,6 +155,13 @@ export default function DashboardPage() {
   useEffect(() => {
     // In a real app, this would be an API call
     setDashboardData(mockDashboardData[selectedCondominiumId]);
+    
+    // Notify other components about the condominium change
+    const channel = new BroadcastChannel('condominium');
+    channel.postMessage({
+      type: 'CONDOMINIUM_CHANGED',
+      condominiumId: selectedCondominiumId
+    });
   }, [selectedCondominiumId]);
 
   // Listen for condominium selection changes from localStorage
@@ -164,12 +176,27 @@ export default function DashboardPage() {
       }
     };
 
-    // Listen for changes
+    // Listen for changes from localStorage
     window.addEventListener('storage', handleStorageChange);
+    
+    // Listen for changes from BroadcastChannel
+    const channel = new BroadcastChannel('condominium');
+    const handleCondominiumChange = (event: MessageEvent) => {
+      if (event.data.type === 'CONDOMINIUM_CHANGED') {
+        const id = event.data.condominiumId;
+        if (id !== selectedCondominiumId) {
+          setSelectedCondominiumId(id);
+        }
+      }
+    };
+    
+    channel.addEventListener('message', handleCondominiumChange);
     
     // Clean up
     return () => {
       window.removeEventListener('storage', handleStorageChange);
+      channel.removeEventListener('message', handleCondominiumChange);
+      channel.close();
     };
   }, [selectedCondominiumId]);
 
