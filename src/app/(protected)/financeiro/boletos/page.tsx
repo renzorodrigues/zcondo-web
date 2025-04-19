@@ -4,8 +4,10 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   RiArrowLeftLine,
-  RiSaveLine
+  RiSaveLine,
+  RiBuilding2Line
 } from 'react-icons/ri';
+import { TbLoader3 } from 'react-icons/tb';
 
 interface BoletoConfig {
   banco: string;
@@ -300,10 +302,13 @@ export default function ConfiguracaoBoletosPage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex items-center justify-center w-10 h-10 bg-purple-600 text-white rounded-full hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50"
+              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? (
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <div className="flex items-center">
+                  <TbLoader3 className="w-5 h-5 text-white animate-spin mr-2" />
+                  <span>Carregando...</span>
+                </div>
               ) : (
                 <RiSaveLine className="text-xl" />
               )}

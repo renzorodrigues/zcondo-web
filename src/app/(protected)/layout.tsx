@@ -250,11 +250,11 @@ export default function ProtectedLayout({
         </div>
       </header>
       
-      <div className="flex pt-20">
+      <div className="flex flex-col lg:flex-row pt-20">
         {/* Sidebar */}
         <aside className={`${
-          isSidebarOpen ? 'w-64' : 'w-20'
-        } bg-white shadow-sm h-[calc(100vh-5rem)] transition-all duration-300 fixed left-0 top-20 z-20`}>
+          isSidebarOpen ? 'w-full lg:w-64' : 'w-full lg:w-20'
+        } bg-white shadow-sm h-auto lg:h-[calc(100vh-5rem)] transition-all duration-300 fixed lg:fixed left-0 top-20 z-20`}>
           <div className="p-4">
             <nav className="space-y-1">
               <button 
@@ -327,8 +327,8 @@ export default function ProtectedLayout({
 
         {/* Main Content */}
         <main className={`${
-          isSidebarOpen ? 'ml-64' : 'ml-20'
-        } flex-1 p-6 transition-all duration-300`}>
+          isSidebarOpen ? 'lg:ml-64' : 'lg:ml-20'
+        } flex-1 p-4 lg:p-6 transition-all duration-300 w-full`}>
           {children}
         </main>
       </div>

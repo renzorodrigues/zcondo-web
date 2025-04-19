@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { RiArrowLeftLine, RiArrowRightLine } from 'react-icons/ri';
+import { RiArrowLeftLine } from 'react-icons/ri';
+import { TbLoader3 } from 'react-icons/tb';
 import { CondominioSteps } from '@/components/ui/Steps';
 import { toast } from 'react-hot-toast';
 
@@ -19,6 +20,7 @@ export default function CadastroCondominioPage() {
     cnpj: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -28,6 +30,7 @@ export default function CadastroCondominioPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setLoading(true);
 
     try {
       // Aqui você faria a chamada para a API para cadastrar o condomínio
@@ -38,6 +41,7 @@ export default function CadastroCondominioPage() {
       console.error('Erro ao cadastrar condomínio:', error);
     } finally {
       setIsSubmitting(false);
+      setLoading(false);
     }
   };
 
@@ -191,13 +195,16 @@ export default function CadastroCondominioPage() {
           <div className="flex justify-end pt-4">
             <button
               type="submit"
-              disabled={isSubmitting}
-              className="flex items-center justify-center w-10 h-10 bg-purple-600 text-white rounded-full hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50"
+              disabled={loading}
+              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSubmitting ? (
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              {loading ? (
+                <div className="flex items-center">
+                  <TbLoader3 className="w-5 h-5 text-white animate-spin mr-2" />
+                  <span>Cadastrando...</span>
+                </div>
               ) : (
-                <RiArrowRightLine className="text-xl" />
+                'Cadastrar'
               )}
             </button>
           </div>

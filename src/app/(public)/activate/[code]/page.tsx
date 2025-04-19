@@ -4,6 +4,8 @@ import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { registerService } from '@/services/auth/register.service';
 import { tokenService } from '@/services/auth/token.service';
+import { RiBuilding2Line, RiCheckboxCircleLine, RiErrorWarningLine } from 'react-icons/ri';
+import { TbLoader3 } from 'react-icons/tb';
 
 export default function ActivatePage({ params }: { params: { code: string } }) {
   const router = useRouter();
@@ -71,7 +73,7 @@ export default function ActivatePage({ params }: { params: { code: string } }) {
           <div className="mt-4">
             {status === 'loading' && (
               <div className="flex flex-col items-center justify-center space-y-4">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+                <TbLoader3 className="w-12 h-12 text-purple-600 animate-spin" />
                 <p className="text-gray-600">Ativando sua conta...</p>
                 <p className="text-sm text-gray-500">Por favor, aguarde enquanto processamos sua ativação.</p>
               </div>

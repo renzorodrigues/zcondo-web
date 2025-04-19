@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { RiBuilding2Line, RiArrowLeftLine, RiDeleteBinLine } from 'react-icons/ri';
+import { TbLoader3 } from 'react-icons/tb';
 import { CondominioSteps } from '@/components/ui/Steps';
 import { Button } from '@/components/ui/Button';
 
@@ -159,13 +160,20 @@ export default function CadastroBlocosPage() {
             </div>
             
             <div className="flex justify-end space-x-4">
-              <Button 
-                type="submit" 
-                className="w-full" 
+              <button
+                type="submit"
                 disabled={loading}
+                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? 'Salvando...' : 'Adicionar Bloco'}
-              </Button>
+                {loading ? (
+                  <div className="flex items-center">
+                    <TbLoader3 className="w-5 h-5 text-white animate-spin mr-2" />
+                    <span>Cadastrando...</span>
+                  </div>
+                ) : (
+                  'Cadastrar'
+                )}
+              </button>
             </div>
           </form>
         )}
