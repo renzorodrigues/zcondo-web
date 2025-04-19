@@ -4,34 +4,40 @@ import type { NextRequest } from 'next/server';
 // Lista de rotas públicas que não requerem autenticação
 const publicRoutes = ['/', '/login', '/register', '/register/confirmation', '/landing', '/activate'];
 
-export function middleware(request: NextRequest) {
+// Função para verificar se uma rota é pública
+const isPublicRoute = (pathname: string) => {
+  return publicRoutes.includes(pathname) || pathname.startsWith('/activate/');
+};
+
+export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
-  const isPublicRoute = publicRoutes.includes(pathname) || pathname.startsWith('/activate/');
-  
-  // Verifica o refresh token no cookie
+  const token = request.cookies.get('access_token')?.value;
   const refreshToken = request.cookies.get('refresh_token')?.value;
 
-  // Se não estiver autenticado e tentar acessar uma rota protegida
-  if (!refreshToken && !isPublicRoute) {
+  // Se não for uma rota pública e o usuário não estiver autenticado, redireciona para o login
+  if (!isPublicRoute(pathname) && !token && !refreshToken) {
     const redirectUrl = new URL('/login', request.url);
     redirectUrl.searchParams.set('redirect', pathname);
     return NextResponse.redirect(redirectUrl);
   }
 
-  // Se estiver autenticado e tentar acessar uma rota pública (exceto landing e home)
-  if (refreshToken && isPublicRoute && pathname !== '/' && pathname !== '/landing') {
-    // Realiza o refresh do token antes de redirecionar
-    const response = NextResponse.redirect(new URL('/dashboard', request.url));
-    
-    // Adiciona um header personalizado para indicar que o token deve ser atualizado
-    response.headers.set('x-refresh-token', 'true');
-    
-    return response;
+  // Se for uma rota pública e o usuário estiver autenticado, redireciona para o dashboard
+  if (isPublicRoute(pathname) && (token || refreshToken)) {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+  ],
 }; 

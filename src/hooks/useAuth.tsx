@@ -22,6 +22,14 @@ const AuthContext = createContext<AuthContextType>({
   isLoading: true,
 });
 
+// Lista de rotas públicas que não requerem autenticação
+const publicRoutes = ['/', '/login', '/register', '/register/confirmation', '/landing', '/activate'];
+
+// Função para verificar se uma rota é pública
+const isPublicRoute = (pathname: string) => {
+  return publicRoutes.includes(pathname) || pathname.startsWith('/activate/');
+};
+
 function AuthProviderContent({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname() || '';
@@ -96,27 +104,15 @@ function AuthProviderContent({ children }: { children: ReactNode }) {
   // Efeito para lidar com redirecionamentos baseado no estado de autenticação
   useEffect(() => {
     if (!isLoading) {
-      if (isAuthenticated) {
-        // Se estiver autenticado e tentar acessar uma rota pública, redireciona para o dashboard
-        if (pathname === '/login' || pathname === '/register' || pathname === '/' || pathname === '/landing') {
-          // Realiza o refresh do token antes de redirecionar
-          tokenService.refreshAccessToken().then(() => {
-            // Não limpa o estado do usuário durante o redirecionamento
-            router.replace('/dashboard');
-          });
-        }
-      } else {
-        if (!pathname.startsWith('/login') && 
-            !pathname.startsWith('/register') && 
-            !pathname.startsWith('/landing') && 
-            !pathname.startsWith('/activate') && 
-            pathname !== '/') {
-          const redirectUrl = `/login?redirect=${encodeURIComponent(pathname)}`;
-          router.replace(redirectUrl);
-        }
+      // Removendo o redirecionamento automático para o dashboard
+      // Isso permitirá que usuários autenticados acessem páginas públicas
+      
+      // Se não estiver autenticado e tentar acessar uma rota protegida, redireciona para o login
+      if (!isAuthenticated && !isPublicRoute(pathname)) {
+        router.push('/login');
       }
     }
-  }, [isAuthenticated, isLoading, pathname, router]);
+  }, [isLoading, isAuthenticated, pathname, router]);
 
   // Efeito para carregar as informações do usuário do localStorage
   useEffect(() => {
