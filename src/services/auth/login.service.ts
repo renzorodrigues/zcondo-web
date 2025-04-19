@@ -26,7 +26,7 @@ interface ApiLoginResponse {
 class LoginService {
   private static instance: LoginService;
 
-  private constructor() {}
+  private constructor() { }
 
   public static getInstance(): LoginService {
     if (!LoginService.instance) {
@@ -36,7 +36,7 @@ class LoginService {
   }
 
   public async login(username: string, password: string): Promise<LoginResponse> {
-    const response = await api.post<ApiLoginResponse>('/Authentication/login', {
+    const response = await api.post<ApiLoginResponse>('/authentication/login', {
       username,
       password
     });
@@ -53,7 +53,7 @@ class LoginService {
       refresh_token: token.refresh_token,
       expires_in: token.expires_in
     });
-    
+
     // Retorna o formato esperado pelo LoginResponse
     return {
       access_token: token.access_token,
@@ -71,9 +71,9 @@ class LoginService {
     try {
       // Primeiro limpa os tokens (incluindo o cookie de refresh token)
       tokenService.clearTokens();
-      
+
       // Depois chama a API de logout
-      await api.post('/Authentication/logout', null, { 
+      await api.delete('/authentication/logout', {
         withCredentials: true,
         headers: {
           'Content-Type': 'application/json'

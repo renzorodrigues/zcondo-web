@@ -54,7 +54,7 @@ class TokenService {
 
   public async refreshAccessToken(): Promise<string | null> {
     try {
-      const response = await api.post('/Authentication/refresh', null, {
+      const response = await api.post('/authentication/refresh', null, {
         withCredentials: true
       });
 

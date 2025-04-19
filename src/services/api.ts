@@ -47,7 +47,7 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     // Se o erro for 401 e não for uma tentativa de refresh
-    if (error.response?.status === 401 && !originalRequest._retry && !originalRequest.url?.includes('/Authentication/refresh')) {
+    if (error.response?.status === 401 && !originalRequest._retry && !originalRequest.url?.includes('/authentication/refresh')) {
       originalRequest._retry = true;
 
       try {
@@ -72,33 +72,33 @@ api.interceptors.response.use(
 
 // API methods
 export const apiService = {
-  // Auth
-  login: (username: string, password: string) => 
-    api.post<LoginResponse>('/Authentication/login', { username, password }),
-  
-  register: (userData: UserData) => 
-    api.post('/Authentication/register', userData),
-  
-  logout: () => 
-    api.post('/Authentication/logout', null, {
+  // Authentication
+  login: (username: string, password: string) =>
+    api.post<LoginResponse>('/authentication/login', { username, password }),
+
+  register: (userData: UserData) =>
+    api.post('/authentication/register', userData),
+
+  logout: () =>
+    api.delete('/authentication/logout', {
       withCredentials: true,
       headers: {
         'Content-Type': 'application/json'
       }
     }),
-  
-  refresh: () => 
-    api.post('/Authentication/refresh', null, {
+
+  refresh: () =>
+    api.post('/authentication/refresh', null, {
       withCredentials: true
     }),
-  
+
   // User
-  getProfile: () => 
+  getProfile: () =>
     api.get<ApiResponse<UserData>>('/User/profile'),
-  
-  updateProfile: (userData: UserData) => 
+
+  updateProfile: (userData: UserData) =>
     api.put('/User/profile', userData),
-  
+
   // Add more API methods as needed
 };
 

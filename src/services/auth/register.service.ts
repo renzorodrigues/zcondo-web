@@ -22,7 +22,7 @@ class RegisterService {
 
   public async register(data: RegisterData): Promise<AuthResponse> {
     try {
-      const response = await api.post<ApiRegisterResponse>('/Authentication/register', data);
+      const response = await api.post<ApiRegisterResponse>('/authentication/register', data);
       
       if (!response.data?.data?.success) {
         throw new Error('Falha no registro');
