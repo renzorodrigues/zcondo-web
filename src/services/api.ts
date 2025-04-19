@@ -6,17 +6,6 @@ interface ApiResponse<T> {
   data: T;
 }
 
-interface LoginResponse {
-  data: {
-    token: {
-      access_token: string;
-      expires_in: number;
-      refresh_token: string;
-    };
-    user: UserData;
-  };
-}
-
 // Configuração base da API
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1',
@@ -70,28 +59,8 @@ api.interceptors.response.use(
   }
 );
 
-// API methods
+// API methods - apenas métodos que não estão em serviços específicos
 export const apiService = {
-  // Authentication
-  login: (username: string, password: string) =>
-    api.post<LoginResponse>('/authentication/login', { username, password }),
-
-  register: (userData: UserData) =>
-    api.post('/authentication/register', userData),
-
-  logout: () =>
-    api.delete('/authentication/logout', {
-      withCredentials: true,
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    }),
-
-  refresh: () =>
-    api.post('/authentication/refresh', null, {
-      withCredentials: true
-    }),
-
   // User
   getProfile: () =>
     api.get<ApiResponse<UserData>>('/User/profile'),

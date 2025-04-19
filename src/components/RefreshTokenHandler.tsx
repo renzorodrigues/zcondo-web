@@ -8,8 +8,8 @@ export default function RefreshTokenHandler() {
 
   useEffect(() => {
     // Verifica se estamos em uma rota pública
-    const publicRoutes = ['/', '/login', '/register', '/landing'];
-    const isPublicRoute = publicRoutes.includes(pathname);
+    const publicRoutes = ['/', '/login', '/register', '/landing', '/activate'];
+    const isPublicRoute = publicRoutes.includes(pathname) || pathname.startsWith('/activate/');
     
     if (isPublicRoute) {
       // Atualiza a meta tag para indicar que o token deve ser atualizado

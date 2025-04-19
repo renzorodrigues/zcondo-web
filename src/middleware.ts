@@ -2,11 +2,11 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 // Lista de rotas públicas que não requerem autenticação
-const publicRoutes = ['/', '/login', '/register', '/landing'];
+const publicRoutes = ['/', '/login', '/register', '/register/confirmation', '/landing', '/activate'];
 
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
-  const isPublicRoute = publicRoutes.includes(pathname);
+  const isPublicRoute = publicRoutes.includes(pathname) || pathname.startsWith('/activate/');
   
   // Verifica o refresh token no cookie
   const refreshToken = request.cookies.get('refresh_token')?.value;
@@ -18,8 +18,8 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
-  // Se estiver autenticado e tentar acessar uma rota pública, redireciona para o dashboard
-  if (refreshToken && isPublicRoute) {
+  // Se estiver autenticado e tentar acessar uma rota pública (exceto landing e home)
+  if (refreshToken && isPublicRoute && pathname !== '/' && pathname !== '/landing') {
     // Realiza o refresh do token antes de redirecionar
     const response = NextResponse.redirect(new URL('/dashboard', request.url));
     

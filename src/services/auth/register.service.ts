@@ -1,5 +1,5 @@
-import { api } from '@/services/api';
-import { RegisterData, AuthResponse } from '@/types/auth';
+import { api } from '../api';
+import { RegisterData, AuthResponse, LoginResponse } from '@/types/auth';
 
 interface ApiRegisterResponse {
   data: {
@@ -8,7 +8,7 @@ interface ApiRegisterResponse {
   };
 }
 
-class RegisterService {
+export class RegisterService {
   private static instance: RegisterService;
 
   private constructor() {}
@@ -20,24 +20,20 @@ class RegisterService {
     return RegisterService.instance;
   }
 
-  public async register(data: RegisterData): Promise<AuthResponse> {
-    try {
-      const response = await api.post<ApiRegisterResponse>('/authentication/register', data);
-      
-      if (!response.data?.data?.success) {
-        throw new Error('Falha no registro');
-      }
+  public async register(data: RegisterData): Promise<{ message: string }> {
+    const response = await api.post<{ message: string }>('/authentication/register', {
+      firstname: data.firstname,
+      lastname: data.lastname,
+      email: data.email,
+      password: data.password,
+      passwordConfirmation: data.passwordConfirmation
+    });
+    return response.data;
+  }
 
-      return {
-        success: true,
-        message: response.data.data.message
-      };
-    } catch (error) {
-      if (error instanceof Error) {
-        throw new Error(`Erro no registro: ${error.message}`);
-      }
-      throw new Error('Erro desconhecido durante o registro');
-    }
+  async activateAccount(activationCode: string): Promise<LoginResponse> {
+    const response = await api.patch<LoginResponse>(`/authentication/activate/${activationCode}`);
+    return response.data;
   }
 }
 

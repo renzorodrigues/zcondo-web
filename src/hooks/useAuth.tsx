@@ -106,7 +106,11 @@ function AuthProviderContent({ children }: { children: ReactNode }) {
           });
         }
       } else {
-        if (!pathname.startsWith('/login') && !pathname.startsWith('/register') && !pathname.startsWith('/landing') && pathname !== '/') {
+        if (!pathname.startsWith('/login') && 
+            !pathname.startsWith('/register') && 
+            !pathname.startsWith('/landing') && 
+            !pathname.startsWith('/activate') && 
+            pathname !== '/') {
           const redirectUrl = `/login?redirect=${encodeURIComponent(pathname)}`;
           router.replace(redirectUrl);
         }

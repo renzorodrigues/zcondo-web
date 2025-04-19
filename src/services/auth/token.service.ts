@@ -11,6 +11,7 @@ class TokenService {
   private accessToken: string | null = null;
   private expiresAt: number | null = null;
   private channel: BroadcastChannel;
+  private refreshPromise: Promise<string | null> | null = null;
 
   private constructor() {
     this.channel = new BroadcastChannel('auth');
@@ -53,26 +54,40 @@ class TokenService {
   }
 
   public async refreshAccessToken(): Promise<string | null> {
-    try {
-      const response = await api.post('/authentication/refresh', null, {
-        withCredentials: true
-      });
-
-      if (response.data?.data?.token?.access_token) {
-        const { access_token, expires_in } = response.data.data.token;
-        this.setTokens({ access_token, expires_in });
-        return access_token;
-      }
-      return null;
-    } catch (error) {
-      console.error('Error refreshing token:', error);
-      return null;
+    // Se já existe uma requisição de refresh em andamento, retorna a mesma Promise
+    if (this.refreshPromise) {
+      return this.refreshPromise;
     }
+
+    // Cria uma nova Promise de refresh
+    this.refreshPromise = (async () => {
+      try {
+        const response = await api.post('/authentication/refresh', null, {
+          withCredentials: true
+        });
+
+        if (response.data?.data?.token?.access_token) {
+          const { access_token, expires_in } = response.data.data.token;
+          this.setTokens({ access_token, expires_in });
+          return access_token;
+        }
+        return null;
+      } catch (error) {
+        console.error('Error refreshing token:', error);
+        return null;
+      } finally {
+        // Limpa a Promise após a conclusão
+        this.refreshPromise = null;
+      }
+    })();
+
+    return this.refreshPromise;
   }
 
   public clearTokens(): void {
     this.accessToken = null;
     this.expiresAt = null;
+    this.refreshPromise = null;
 
     // Notifica outras abas que os tokens foram limpos
     this.channel.postMessage({
