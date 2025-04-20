@@ -63,10 +63,10 @@ api.interceptors.response.use(
 export const apiService = {
   // User
   getProfile: () =>
-    api.get<ApiResponse<UserData>>('/User/profile'),
+    api.get<ApiResponse<UserData>>('/authentication/profile'),
 
   updateProfile: (userData: UserData) =>
-    api.put('/User/profile', userData),
+    api.put('/authentication/profile', userData),
 
   // Add more API methods as needed
 };

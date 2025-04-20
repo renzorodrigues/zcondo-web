@@ -9,14 +9,9 @@ interface TokenData {
 class TokenService {
   private static instance: TokenService;
   private accessToken: string | null = null;
-  private expiresAt: number | null = null;
-  private channel: BroadcastChannel;
-  private refreshPromise: Promise<string | null> | null = null;
+  private refreshToken: string | null = null;
 
-  private constructor() {
-    this.channel = new BroadcastChannel('auth');
-    this.channel.addEventListener('message', this.handleTokenUpdate);
-  }
+  private constructor() {}
 
   public static getInstance(): TokenService {
     if (!TokenService.instance) {
@@ -25,76 +20,64 @@ class TokenService {
     return TokenService.instance;
   }
 
-  private handleTokenUpdate = (event: MessageEvent) => {
-    if (event.data.type === 'TOKEN_UPDATE') {
-      this.accessToken = event.data.token;
-      this.expiresAt = event.data.expiresAt;
-    }
-  };
+  public setAccessToken(token: string): void {
+    this.accessToken = token;
+  }
 
-  public setTokens(data: TokenData): void {
-    this.accessToken = data.access_token;
-    this.expiresAt = Date.now() + data.expires_in * 1000;
-
-    // Notifica outras abas sobre a atualização do token
-    this.channel.postMessage({
-      type: 'TOKEN_UPDATE',
-      token: data.access_token,
-      expiresAt: this.expiresAt
-    });
+  public setRefreshToken(token: string): void {
+    this.refreshToken = token;
   }
 
   public getAccessToken(): string | null {
     return this.accessToken;
   }
 
-  public isTokenExpired(): boolean {
-    if (!this.expiresAt) return true;
-    return Date.now() >= this.expiresAt;
-  }
-
-  public async refreshAccessToken(): Promise<string | null> {
-    // Se já existe uma requisição de refresh em andamento, retorna a mesma Promise
-    if (this.refreshPromise) {
-      return this.refreshPromise;
-    }
-
-    // Cria uma nova Promise de refresh
-    this.refreshPromise = (async () => {
-      try {
-        const response = await api.post('/authentication/refresh', null, {
-          withCredentials: true
-        });
-
-        if (response.data?.data?.token?.access_token) {
-          const { access_token, expires_in } = response.data.data.token;
-          this.setTokens({ access_token, expires_in });
-          return access_token;
-        }
-        return null;
-      } catch (error) {
-        console.error('Error refreshing token:', error);
-        return null;
-      } finally {
-        // Limpa a Promise após a conclusão
-        this.refreshPromise = null;
-      }
-    })();
-
-    return this.refreshPromise;
+  public getRefreshToken(): string | null {
+    return this.refreshToken;
   }
 
   public clearTokens(): void {
     this.accessToken = null;
-    this.expiresAt = null;
-    this.refreshPromise = null;
+    this.refreshToken = null;
+  }
 
-    // Notifica outras abas que os tokens foram limpos
-    this.channel.postMessage({
-      type: 'TOKEN_UPDATE',
-      token: null,
-      expiresAt: null
-    });
+  public isTokenExpired(): boolean {
+    if (!this.accessToken) return true;
+    
+    try {
+      const tokenData = JSON.parse(atob(this.accessToken.split('.')[1]));
+      const expirationTime = tokenData.exp * 1000; // Convert to milliseconds
+      return Date.now() >= expirationTime;
+    } catch (error) {
+      console.error('Error checking token expiration:', error);
+      return true;
+    }
+  }
+
+  public async refreshAccessToken(): Promise<string | null> {
+    if (!this.refreshToken) return null;
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/refresh-token`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ refresh_token: this.refreshToken }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to refresh token');
+      }
+
+      const data = await response.json();
+      this.accessToken = data.access_token;
+      return this.accessToken;
+    } catch (error) {
+      console.error('Error refreshing token:', error);
+      this.clearTokens();
+      return null;
+    }
   }
 }
 

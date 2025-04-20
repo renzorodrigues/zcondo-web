@@ -1,26 +1,24 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode, useCallback, Suspense } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { loginService } from '@/services/auth/login.service';
 import { tokenService } from '@/services/auth/token.service';
+import { userService } from '@/services/auth/user.service';
+import { apiService } from '@/services/api';
 import { UserData } from '@/types/auth';
+import { toast } from 'react-hot-toast';
 
 interface AuthContextType {
   isAuthenticated: boolean;
-  user: UserData | null;
-  login: (username: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
+  isUserRegistered: boolean;
   isLoading: boolean;
+  user: UserData | null;
+  login: (username: string, password: string) => Promise<boolean>;
+  logout: () => void;
 }
 
-const AuthContext = createContext<AuthContextType>({
-  isAuthenticated: false,
-  user: null,
-  login: async () => {},
-  logout: async () => {},
-  isLoading: true,
-});
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Lista de rotas públicas que não requerem autenticação
 const publicRoutes = ['/', '/login', '/register', '/register/confirmation', '/landing', '/activate'];
@@ -30,163 +28,180 @@ const isPublicRoute = (pathname: string) => {
   return publicRoutes.includes(pathname) || pathname.startsWith('/activate/');
 };
 
-function AuthProviderContent({ children }: { children: ReactNode }) {
-  const router = useRouter();
-  const pathname = usePathname() || '';
-  const [user, setUser] = useState<UserData | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+// Funções para gerenciar dados do usuário no localStorage
+const USER_STORAGE_KEY = 'user_data';
 
-  // Bootstrap auth function
-  const bootstrapAuth = useCallback(async () => {
+const saveUserToStorage = (userData: UserData) => {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userData));
+  }
+};
+
+const getUserFromStorage = (): UserData | null => {
+  if (typeof window !== 'undefined') {
+    const stored = localStorage.getItem(USER_STORAGE_KEY);
+    return stored ? JSON.parse(stored) : null;
+  }
+  return null;
+};
+
+const clearUserFromStorage = () => {
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem(USER_STORAGE_KEY);
+  }
+};
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isUserRegistered, setIsUserRegistered] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<UserData | null>(null);
+
+  const checkAuth = useCallback(async () => {
     try {
-      const token = tokenService.getAccessToken();
-      
-      if (!token) {
-        setUser(null);
-        setIsAuthenticated(false);
-        setIsLoading(false);
+      // Tenta recuperar usuário do localStorage primeiro
+      const storedUser = getUserFromStorage();
+      if (storedUser) {
+        setUser(storedUser);
+        setIsAuthenticated(true);
         return;
       }
 
-      // Se o token expirou, tenta renovar
-      if (tokenService.isTokenExpired()) {
-        const newToken = await tokenService.refreshAccessToken();
-        if (!newToken) {
-          setUser(null);
-          setIsAuthenticated(false);
-          setIsLoading(false);
-          return;
-        }
+      const token = tokenService.getAccessToken();
+      if (!token) {
+        setIsAuthenticated(false);
+        setIsUserRegistered(false);
+        setUser(null);
+        return;
       }
 
-      // Se chegou aqui, temos um token válido
+      // Verifica se o token é válido
+      const isValid = !tokenService.isTokenExpired();
+      if (!isValid) {
+        tokenService.clearTokens();
+        setIsAuthenticated(false);
+        setIsUserRegistered(false);
+        setUser(null);
+        clearUserFromStorage();
+        return;
+      }
+
+      // Se já está autenticado e tem usuário, apenas verifica o registro
+      if (isAuthenticated && user) {
+        const isRegistered = await userService.checkUser(user.email);
+        setIsUserRegistered(isRegistered);
+        return;
+      }
+
       setIsAuthenticated(true);
-      setIsLoading(false);
+
+      // Se não tem no localStorage, busca do perfil
+      const response = await apiService.getProfile();
+      const userData = response.data.data;
+      setUser(userData);
+      saveUserToStorage(userData);
+
+      // Verifica se o usuário está registrado usando o email do login
+      if (!userData?.email) {
+        console.error('Email do usuário não encontrado');
+        return;
+      }
+
+      const isRegistered = await userService.checkUser(userData.email);
+      setIsUserRegistered(isRegistered);
+
+      // Atualiza o cookie is_user_registered
+      document.cookie = `is_user_registered=${isRegistered}; path=/; max-age=86400; SameSite=Lax`;
     } catch (error) {
-      console.error('Error during bootstrap:', error);
-      setUser(null);
-      setIsAuthenticated(false);
+      console.error('Erro ao verificar autenticação:', error);
+      // Em caso de erro, mantém os dados do usuário se existirem
+      const storedUser = getUserFromStorage();
+      if (storedUser) {
+        setUser(storedUser);
+        setIsAuthenticated(true);
+      }
+    } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [router, user, isAuthenticated]);
 
-  // Bootstrap auth state
   useEffect(() => {
-    bootstrapAuth();
-  }, [bootstrapAuth]);
-
-  // Listen for storage events
-  useEffect(() => {
-    const handleStorageChange = (e: StorageEvent) => {
-      // Ignore changes from condominium selection
-      if (e.key === 'selectedCondominiumId') return;
-      
-      bootstrapAuth();
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, [bootstrapAuth]);
-
-  // Efeito para verificar o token quando o pathname mudar
-  useEffect(() => {
-    // Verifica se o token existe e está válido quando o pathname mudar
-    const token = tokenService.getAccessToken();
-    if (token && !tokenService.isTokenExpired()) {
-      // Se o token é válido, mantém o usuário autenticado
-      if (!isAuthenticated) {
-        setIsAuthenticated(true);
-      }
-    }
-  }, [pathname, user, isAuthenticated]);
-
-  // Efeito para lidar com redirecionamentos baseado no estado de autenticação
-  useEffect(() => {
-    if (!isLoading) {
-      // Removendo o redirecionamento automático para o dashboard
-      // Isso permitirá que usuários autenticados acessem páginas públicas
-      
-      // Se não estiver autenticado e tentar acessar uma rota protegida, redireciona para o login
-      if (!isAuthenticated && !isPublicRoute(pathname)) {
-        router.push('/login');
-      }
-    }
-  }, [isLoading, isAuthenticated, pathname, router]);
-
-  // Efeito para carregar as informações do usuário do localStorage
-  useEffect(() => {
-    // Tenta carregar as informações do usuário do localStorage
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      try {
-        const userData = JSON.parse(storedUser);
-        setUser(userData);
-        setIsAuthenticated(true);
-      } catch (error) {
-        console.error('Error parsing stored user data:', error);
-        localStorage.removeItem('user');
-      }
-    }
-  }, []);
+    // Verifica a autenticação apenas uma vez ao montar o componente
+    checkAuth();
+  }, []); // Removido as dependências que causavam o loop
 
   const login = async (username: string, password: string) => {
-    const result = await loginService.login(username, password);
-
-    if (!result.access_token) {
-      throw new Error('No access token received');
-    }
-
-    // Usar diretamente as informações do usuário da resposta da API
-    if (result.user) {
-      // Armazena as informações do usuário no estado
-      setUser(result.user);
+    try {
+      setIsLoading(true);
+      const { access_token, user: userData } = await loginService.login(username, password);
+      tokenService.setAccessToken(access_token);
+      setUser(userData);
+      saveUserToStorage(userData);
       setIsAuthenticated(true);
       
-      // Armazena as informações do usuário no localStorage para persistência
-      localStorage.setItem('user', JSON.stringify(result.user));
+      // Verifica se o usuário está registrado
+      console.log('Verificando registro do usuário após login:', userData.email);
+      const isRegistered = await userService.checkUser(userData.email);
+      console.log('Resultado da verificação de registro:', isRegistered);
+      setIsUserRegistered(isRegistered);
+      
+      // Atualiza o cookie is_user_registered
+      document.cookie = `is_user_registered=${isRegistered}; path=/; max-age=86400; SameSite=Lax`;
+      
+      // Retorna o estado de registro para o componente de login fazer o redirecionamento
+      return isRegistered;
+    } catch (error) {
+      console.error('Erro no login:', error);
+      toast.error('Usuário ou senha inválidos');
+      throw error;
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const logout = async () => {
     try {
-      // Limpa as informações do usuário do estado e do localStorage
-      setUser(null);
-      setIsAuthenticated(false);
-      localStorage.removeItem('user');
-      
-      // Chama a API de logout
+      // Primeiro chama o serviço de logout para invalidar o token no servidor
       await loginService.logout();
-      router.replace('/');
     } catch (error) {
-      console.error('Error during logout:', error);
-      // Mesmo em caso de erro, garante que os tokens estejam limpos
+      console.error('Erro ao fazer logout:', error);
+    } finally {
+      // Mesmo se houver erro, limpa os tokens e estados
+      tokenService.clearTokens();
       setUser(null);
       setIsAuthenticated(false);
-      localStorage.removeItem('user');
-      router.replace('/');
+      setIsUserRegistered(false);
+      clearUserFromStorage();
+      
+      // Remove o cookie is_user_registered
+      document.cookie = 'is_user_registered=; path=/; max-age=0; SameSite=Lax';
+      
+      // Por fim, redireciona para o login
+      router.push('/login');
     }
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, login, logout, isLoading }}>
+    <AuthContext.Provider
+      value={{
+        isAuthenticated,
+        isUserRegistered,
+        isLoading,
+        user,
+        login,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
 }
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <AuthProviderContent>{children}</AuthProviderContent>
-    </Suspense>
-  );
-}
-
-export const useAuth = () => {
+export function useAuth() {
   const context = useContext(AuthContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-}; 
+} 

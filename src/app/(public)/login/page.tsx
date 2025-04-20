@@ -9,7 +9,6 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import LoadingOverlay from '@/components/LoadingOverlay';
 import { HiEye, HiEyeOff } from 'react-icons/hi';
-import { RiBuilding2Line } from 'react-icons/ri';
 import { TbLoader3 } from 'react-icons/tb';
 
 export default function LoginPage() {
@@ -31,17 +30,19 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setIsLoading(true);
-
     try {
-      await login(username, password);
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
+      setIsLoading(true);
+      const isRegistered = await login(username, password);
+      console.log('Login bem sucedido, usuário registrado:', isRegistered);
+      
+      // Redireciona com base no estado de registro
+      if (isRegistered) {
+        router.push('/dashboard');
       } else {
-        setError('Username ou senha inválidos');
+        router.push('/config');
       }
+    } catch (error) {
+      console.error('Erro no login:', error);
     } finally {
       setIsLoading(false);
     }

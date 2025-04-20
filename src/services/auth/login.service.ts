@@ -47,12 +47,11 @@ class LoginService {
 
     const { token, user } = response.data.data;
 
-    // Armazena o token em memória
-    tokenService.setTokens({
-      access_token: token.access_token,
-      refresh_token: token.refresh_token,
-      expires_in: token.expires_in
-    });
+    // Armazena os tokens usando os novos métodos
+    tokenService.setAccessToken(token.access_token);
+    if (token.refresh_token) {
+      tokenService.setRefreshToken(token.refresh_token);
+    }
 
     // Retorna o formato esperado pelo LoginResponse
     return {
@@ -69,7 +68,7 @@ class LoginService {
 
   public async logout(): Promise<void> {
     try {
-      // Primeiro limpa os tokens (incluindo o cookie de refresh token)
+      // Primeiro limpa os tokens
       tokenService.clearTokens();
 
       // Depois chama a API de logout

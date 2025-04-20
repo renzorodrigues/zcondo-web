@@ -141,8 +141,8 @@ export default function ProtectedLayout({
     setIsUserDropdownOpen(!isUserDropdownOpen);
   };
 
-  const handleLogout = async () => {
-    await logout();
+  const handleLogout = () => {
+    logout();
     setIsUserDropdownOpen(false);
   };
 
