@@ -11,7 +11,7 @@ const isPublicRoute = (pathname: string) => {
 
 // Função para verificar se uma rota é a página de cadastro do usuário
 const isUserRegistrationRoute = (pathname: string) => {
-  return pathname === '/configuracoes/perfil/cadastro';
+  return pathname === '/cadastro';
 };
 
 export async function middleware(request: NextRequest) {
@@ -23,7 +23,7 @@ export async function middleware(request: NextRequest) {
   // Se o usuário estiver autenticado mas não registrado, redireciona para a página de cadastro
   // independente da rota que ele tenta acessar (exceto a própria página de cadastro)
   if ((token || refreshToken) && !isUserRegistered && !isUserRegistrationRoute(pathname)) {
-    return NextResponse.redirect(new URL('/configuracoes/perfil/cadastro', request.url));
+    return NextResponse.redirect(new URL('/cadastro', request.url));
   }
 
   // Se for uma rota pública e o usuário estiver autenticado, redireciona para o dashboard

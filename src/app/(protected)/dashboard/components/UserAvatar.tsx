@@ -12,7 +12,7 @@ export default function UserAvatar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
-  const isCadastroPage = pathname === '/configuracoes/perfil/cadastro';
+  const isCadastroPage = pathname === '/cadastro';
 
   // Mantém as informações do usuário durante a transição de logout
   useEffect(() => {

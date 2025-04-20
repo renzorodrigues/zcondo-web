@@ -41,6 +41,7 @@ export default function ProtectedLayout({
   const [selectedCondominium, setSelectedCondominium] = useState<Condominium | null>(null);
   const [isCondominiumDropdownOpen, setIsCondominiumDropdownOpen] = useState(false);
   const isDashboard = pathname === '/dashboard';
+  const isRegistration = pathname === '/cadastro';
   const { logout, user } = useAuth();
   
   // Refs para os dropdowns
@@ -146,7 +147,7 @@ export default function ProtectedLayout({
             
             {/* Center - Condominium Selector */}
             <div className="flex-1 flex justify-center items-center">
-              {isDashboard && (
+              {isDashboard && !isRegistration && (
                 <div className="relative" ref={condominiumDropdownRef}>
                   <button 
                     onClick={toggleCondominiumDropdown}
@@ -187,85 +188,89 @@ export default function ProtectedLayout({
         </div>
       </header>
       
-      <div className="flex flex-col lg:flex-row pt-20">
+      <div className={`flex flex-col lg:flex-row pt-20 ${isRegistration ? 'justify-center' : ''}`}>
         {/* Sidebar */}
-        <aside className={`${
-          isSidebarOpen ? 'w-full lg:w-64' : 'w-full lg:w-20'
-        } bg-white shadow-sm h-auto lg:h-[calc(100vh-5rem)] transition-all duration-300 fixed lg:fixed left-0 top-20 z-20`}>
-          <div className="p-4">
-            <nav className="space-y-1">
-              <button 
-                onClick={toggleSidebar}
-                className={`w-full flex items-center ${
-                  isSidebarOpen ? 'px-2' : 'justify-center'
-                } py-2 mb-6 text-sm font-medium rounded-md text-gray-600`}
-              >
-                <RiMenuLine className={`${isSidebarOpen ? 'text-base' : 'text-lg'} transition-all duration-300`} />
-              </button>
+        {!isRegistration && (
+          <aside className={`${
+            isSidebarOpen ? 'w-full lg:w-64' : 'w-full lg:w-20'
+          } bg-white shadow-sm h-auto lg:h-[calc(100vh-5rem)] transition-all duration-300 fixed lg:fixed left-0 top-20 z-20`}>
+            <div className="p-4">
+              <nav className="space-y-1">
+                <button 
+                  onClick={toggleSidebar}
+                  className={`w-full flex items-center ${
+                    isSidebarOpen ? 'px-2' : 'justify-center'
+                  } py-2 mb-6 text-sm font-medium rounded-md text-gray-600`}
+                >
+                  <RiMenuLine className={`${isSidebarOpen ? 'text-base' : 'text-lg'} transition-all duration-300`} />
+                </button>
 
-              <Link
-                href="/dashboard"
-                className={`flex items-center ${
-                  isSidebarOpen ? 'px-2' : 'justify-center'
-                } py-2 text-sm font-medium rounded-md hover:bg-gray-100 ${
-                  pathname === '/dashboard'
-                    ? 'text-purple-700 bg-purple-50'
-                    : 'text-gray-600'
-                }`}
-              >
-                <RiHome4Line className={`${isSidebarOpen ? 'text-base' : 'text-lg'} transition-all duration-300`} />
-                <span className={`ml-3 transition-all ${isSidebarOpen ? 'duration-500' : 'duration-300'} ${isSidebarOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0'}`}>Dashboard</span>
-              </Link>
+                <Link
+                  href="/dashboard"
+                  className={`flex items-center ${
+                    isSidebarOpen ? 'px-2' : 'justify-center'
+                  } py-2 text-sm font-medium rounded-md hover:bg-gray-100 ${
+                    pathname === '/dashboard'
+                      ? 'text-purple-700 bg-purple-50'
+                      : 'text-gray-600'
+                  }`}
+                >
+                  <RiHome4Line className={`${isSidebarOpen ? 'text-base' : 'text-lg'} transition-all duration-300`} />
+                  <span className={`ml-3 transition-all ${isSidebarOpen ? 'duration-500' : 'duration-300'} ${isSidebarOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0'}`}>Dashboard</span>
+                </Link>
 
-              <Link
-                href="/condominios"
-                className={`flex items-center ${
-                  isSidebarOpen ? 'px-2' : 'justify-center'
-                } py-2 text-sm font-medium rounded-md hover:bg-gray-100 ${
-                  pathname.startsWith('/condominios')
-                    ? 'text-purple-700 bg-purple-50'
-                    : 'text-gray-600'
-                }`}
-              >
-                <RiBuilding2Line className={`${isSidebarOpen ? 'text-base' : 'text-lg'} transition-all duration-300`} />
-                <span className={`ml-3 transition-all ${isSidebarOpen ? 'duration-500' : 'duration-300'} ${isSidebarOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0'}`}>Condomínios</span>
-              </Link>
+                <Link
+                  href="/condominios"
+                  className={`flex items-center ${
+                    isSidebarOpen ? 'px-2' : 'justify-center'
+                  } py-2 text-sm font-medium rounded-md hover:bg-gray-100 ${
+                    pathname.startsWith('/condominios')
+                      ? 'text-purple-700 bg-purple-50'
+                      : 'text-gray-600'
+                  }`}
+                >
+                  <RiBuilding2Line className={`${isSidebarOpen ? 'text-base' : 'text-lg'} transition-all duration-300`} />
+                  <span className={`ml-3 transition-all ${isSidebarOpen ? 'duration-500' : 'duration-300'} ${isSidebarOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0'}`}>Condomínios</span>
+                </Link>
 
-              <Link
-                href="/moradores"
-                className={`flex items-center ${
-                  isSidebarOpen ? 'px-2' : 'justify-center'
-                } py-2 text-sm font-medium rounded-md hover:bg-gray-100 ${
-                  pathname.startsWith('/moradores')
-                    ? 'text-purple-700 bg-purple-50'
-                    : 'text-gray-600'
-                }`}
-              >
-                <RiGroupLine className={`${isSidebarOpen ? 'text-base' : 'text-lg'} transition-all duration-300`} />
-                <span className={`ml-3 transition-all ${isSidebarOpen ? 'duration-500' : 'duration-300'} ${isSidebarOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0'}`}>Moradores</span>
-              </Link>
+                <Link
+                  href="/moradores"
+                  className={`flex items-center ${
+                    isSidebarOpen ? 'px-2' : 'justify-center'
+                  } py-2 text-sm font-medium rounded-md hover:bg-gray-100 ${
+                    pathname.startsWith('/moradores')
+                      ? 'text-purple-700 bg-purple-50'
+                      : 'text-gray-600'
+                  }`}
+                >
+                  <RiGroupLine className={`${isSidebarOpen ? 'text-base' : 'text-lg'} transition-all duration-300`} />
+                  <span className={`ml-3 transition-all ${isSidebarOpen ? 'duration-500' : 'duration-300'} ${isSidebarOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0'}`}>Moradores</span>
+                </Link>
 
-              <Link
-                href="/financeiro"
-                className={`flex items-center ${
-                  isSidebarOpen ? 'px-2' : 'justify-center'
-                } py-2 text-sm font-medium rounded-md hover:bg-gray-100 ${
-                  pathname.startsWith('/financeiro')
-                    ? 'text-purple-700 bg-purple-50'
-                    : 'text-gray-600'
-                }`}
-              >
-                <RiMoneyDollarCircleLine className={`${isSidebarOpen ? 'text-base' : 'text-lg'} transition-all duration-300`} />
-                <span className={`ml-3 transition-all ${isSidebarOpen ? 'duration-500' : 'duration-300'} ${isSidebarOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0'}`}>Financeiro</span>
-              </Link>
-            </nav>
-          </div>
-        </aside>
+                <Link
+                  href="/financeiro"
+                  className={`flex items-center ${
+                    isSidebarOpen ? 'px-2' : 'justify-center'
+                  } py-2 text-sm font-medium rounded-md hover:bg-gray-100 ${
+                    pathname.startsWith('/financeiro')
+                      ? 'text-purple-700 bg-purple-50'
+                      : 'text-gray-600'
+                  }`}
+                >
+                  <RiMoneyDollarCircleLine className={`${isSidebarOpen ? 'text-base' : 'text-lg'} transition-all duration-300`} />
+                  <span className={`ml-3 transition-all ${isSidebarOpen ? 'duration-500' : 'duration-300'} ${isSidebarOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0'}`}>Financeiro</span>
+                </Link>
+              </nav>
+            </div>
+          </aside>
+        )}
 
         {/* Main Content */}
         <main className={`${
-          isSidebarOpen ? 'lg:ml-64' : 'lg:ml-20'
-        } flex-1 p-4 lg:p-6 transition-all duration-300 w-full`}>
+          isRegistration 
+            ? 'w-full max-w-4xl mx-auto' 
+            : (isSidebarOpen ? 'lg:ml-64' : 'lg:ml-20')
+        } flex-1 p-4 lg:p-6 transition-all duration-300`}>
           {children}
         </main>
       </div>
