@@ -42,7 +42,7 @@ export default function ProtectedLayout({
   const [isCondominiumDropdownOpen, setIsCondominiumDropdownOpen] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const isDashboard = pathname === '/dashboard';
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   
   // Refs para os dropdowns
   const condominiumDropdownRef = useRef<HTMLDivElement>(null);
@@ -213,6 +213,7 @@ export default function ProtectedLayout({
                   <div className="absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white z-10">
                     <div className="py-1" role="menu" aria-orientation="vertical">
                       <div className="px-4 py-2 border-b border-gray-100">
+                        <p className="text-sm font-medium text-gray-900">{user?.name}</p>
                       </div>
                       
                       <Link 
