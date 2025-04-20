@@ -40,17 +40,11 @@ export default function ProtectedLayout({
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [selectedCondominium, setSelectedCondominium] = useState<Condominium | null>(null);
   const [isCondominiumDropdownOpen, setIsCondominiumDropdownOpen] = useState(false);
-  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const isDashboard = pathname === '/dashboard';
   const { logout, user } = useAuth();
   
   // Refs para os dropdowns
   const condominiumDropdownRef = useRef<HTMLDivElement>(null);
-  const userDropdownRef = useRef<HTMLDivElement>(null);
-
-  // Get username from email (part before @)
-  
-  // Get initials for avatar
 
   // Load selected condominium from localStorage on mount
   useEffect(() => {
@@ -94,15 +88,6 @@ export default function ProtectedLayout({
       ) {
         setIsCondominiumDropdownOpen(false);
       }
-      
-      // Close user dropdown if click is outside
-      if (
-        isUserDropdownOpen && 
-        userDropdownRef.current && 
-        !userDropdownRef.current.contains(event.target as Node)
-      ) {
-        setIsUserDropdownOpen(false);
-      }
     };
 
     // Add event listener
@@ -112,7 +97,7 @@ export default function ProtectedLayout({
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isCondominiumDropdownOpen, isUserDropdownOpen]);
+  }, [isCondominiumDropdownOpen]);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -137,13 +122,8 @@ export default function ProtectedLayout({
     });
   };
 
-  const toggleUserDropdown = () => {
-    setIsUserDropdownOpen(!isUserDropdownOpen);
-  };
-
   const handleLogout = () => {
     logout();
-    setIsUserDropdownOpen(false);
   };
 
   return (
@@ -201,51 +181,7 @@ export default function ProtectedLayout({
             
             {/* Right side - User Menu */}
             <div className="w-64 flex justify-end items-center pr-8">
-              <div ref={userDropdownRef} className="relative">
-                <button 
-                  onClick={toggleUserDropdown}
-                  className="flex items-center space-x-2"
-                >
-                  <UserAvatar />
-                </button>
-                
-                {isUserDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white z-10">
-                    <div className="py-1" role="menu" aria-orientation="vertical">
-                      <div className="px-4 py-2 border-b border-gray-100">
-                        <p className="text-sm font-medium text-gray-900">{user?.name}</p>
-                      </div>
-                      
-                      <Link 
-                        href="/configuracoes/perfil" 
-                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        role="menuitem"
-                      >
-                        <RiUserSettingsLine className="mr-3 text-gray-500" />
-                        Configurações
-                      </Link>
-                      
-                      <Link 
-                        href="/change-password" 
-                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        role="menuitem"
-                      >
-                        <RiLockPasswordLine className="mr-3 text-gray-500" />
-                        Alterar Senha
-                      </Link>
-                      
-                      <button
-                        onClick={handleLogout}
-                        className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        role="menuitem"
-                      >
-                        <RiLogoutBoxLine className="mr-3 text-gray-500" />
-                        Sair
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
+              <UserAvatar />
             </div>
           </div>
         </div>
