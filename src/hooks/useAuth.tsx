@@ -89,7 +89,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Se já está autenticado e tem usuário, apenas verifica o registro
       if (isAuthenticated && user) {
-        const isRegistered = await userService.checkUser(user.email);
+        const isRegistered = await userService.checkActivation(user.email);
         setIsUserRegistered(isRegistered);
         return;
       }
@@ -108,7 +108,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      const isRegistered = await userService.checkUser(userData.email);
+      const isRegistered = await userService.checkActivation(userData.email);
       setIsUserRegistered(isRegistered);
 
       // Atualiza o cookie is_user_registered
@@ -142,7 +142,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       // Verifica se o usuário está registrado
       console.log('Verificando registro do usuário após login:', userData.email);
-      const isRegistered = await userService.checkUser(userData.email);
+      const isRegistered = await userService.checkActivation(userData.email);
       console.log('Resultado da verificação de registro:', isRegistered);
       setIsUserRegistered(isRegistered);
       

@@ -20,7 +20,19 @@ export async function middleware(request: NextRequest) {
   const refreshToken = request.cookies.get('refresh_token')?.value;
   const isUserRegistered = request.cookies.get('is_user_registered')?.value === 'true';
 
-  // Se o usuário estiver autenticado mas não registrado, redireciona para a página de cadastro
+  // Se não estiver autenticado e tentar acessar a página de cadastro, redireciona para o login
+  if (isUserRegistrationRoute(pathname) && !token && !refreshToken) {
+    const redirectUrl = new URL('/login', request.url);
+    redirectUrl.searchParams.set('redirect', pathname);
+    return NextResponse.redirect(redirectUrl);
+  }
+
+  // Se estiver autenticado e registrado e tentar acessar a página de cadastro, redireciona para o dashboard
+  if (isUserRegistrationRoute(pathname) && (token || refreshToken) && isUserRegistered) {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
+  }
+
+  // Se estiver autenticado mas não registrado, redireciona para a página de cadastro
   // independente da rota que ele tenta acessar (exceto a própria página de cadastro)
   if ((token || refreshToken) && !isUserRegistered && !isUserRegistrationRoute(pathname)) {
     return NextResponse.redirect(new URL('/cadastro', request.url));
