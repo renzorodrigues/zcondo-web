@@ -62,8 +62,14 @@ export default function UserRegistrationPage() {
       }
       
       try {
+        // Verifica o status de registro diretamente com o serviço
+        const isRegistered = await userService.checkActivation(user.email);
+        console.log('Status de registro verificado:', isRegistered);
+        
         // Se o usuário já estiver registrado, redireciona para o dashboard
-        if (isUserRegistered) {
+        if (isRegistered) {
+          // Atualiza o cookie is_user_registered para garantir consistência
+          document.cookie = `is_user_registered=true; path=/; max-age=86400; SameSite=Lax; secure`;
           router.replace('/dashboard');
           return;
         }
@@ -75,7 +81,7 @@ export default function UserRegistrationPage() {
     };
 
     checkRegistration();
-  }, [user, isUserRegistered, router]);
+  }, [user, router]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -87,17 +93,17 @@ export default function UserRegistrationPage() {
     setIsSubmitting(true);
 
     try {
+      // Atualiza o perfil do usuário com os dados do formulário
       await userService.updateUserProfile(formData);
+      
+      // Após o cadastro bem-sucedido, atualiza o cookie is_user_registered
+      document.cookie = `is_user_registered=true; path=/; max-age=86400; SameSite=Lax; secure`;
+      
       toast.success('Cadastro realizado com sucesso!');
-      
-      // Atualiza o cookie is_user_registered
-      document.cookie = 'is_user_registered=true; path=/; max-age=86400; SameSite=Lax';
-      
-      // Redireciona para o dashboard
       router.push('/dashboard');
     } catch (error) {
       console.error('Erro ao cadastrar usuário:', error);
-      toast.error('Erro ao cadastrar usuário. Por favor, tente novamente.');
+      toast.error('Erro ao cadastrar usuário. Tente novamente.');
     } finally {
       setIsSubmitting(false);
     }
