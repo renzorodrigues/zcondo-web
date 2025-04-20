@@ -21,8 +21,8 @@ interface UserProfileData {
 
 export default function UserRegistrationPage() {
   const router = useRouter();
-  const { user } = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
+  const { user, isUserRegistered } = useAuth();
+  const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<UserProfileData>({
     firstName: '',
@@ -56,14 +56,16 @@ export default function UserRegistrationPage() {
   // Verifica se o usuário já está registrado
   useEffect(() => {
     const checkRegistration = async () => {
-      if (!user?.email) return;
+      if (!user?.email) {
+        setIsLoading(false);
+        return;
+      }
       
-      setIsLoading(true);
       try {
-        const isRegistered = await userService.checkUser(user.email);
-        if (isRegistered) {
-          // Se o usuário já estiver registrado, redireciona para o dashboard
-          router.push('/dashboard');
+        // Se o usuário já estiver registrado, redireciona para o dashboard
+        if (isUserRegistered) {
+          router.replace('/dashboard');
+          return;
         }
       } catch (error) {
         console.error('Erro ao verificar registro do usuário:', error);
@@ -73,7 +75,7 @@ export default function UserRegistrationPage() {
     };
 
     checkRegistration();
-  }, [user, router]);
+  }, [user, isUserRegistered, router]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -101,7 +103,8 @@ export default function UserRegistrationPage() {
     }
   };
 
-  if (isLoading) {
+  // Se estiver carregando ou o usuário já estiver registrado, mostra o loading
+  if (isLoading || isUserRegistered) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
