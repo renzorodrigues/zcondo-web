@@ -168,7 +168,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const isRegistered = await userService.checkActivation(userData.email);
       console.log('Resultado da verificação de registro:', isRegistered);
       setIsUserRegistered(isRegistered);
-      setUserRegisteredCookie(isRegistered);
       
       // Retorna o status de registro para o componente de login fazer o redirecionamento
       return isRegistered;

@@ -10,6 +10,9 @@ import { useAuth } from '@/hooks/useAuth';
 import LoadingOverlay from '@/components/LoadingOverlay';
 import { HiEye, HiEyeOff } from 'react-icons/hi';
 import { TbLoader3 } from 'react-icons/tb';
+import { userService } from '@/services/auth/user.service';
+import { tokenService } from '@/services/auth/token.service';
+import { loginService } from '@/services/auth/login.service';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -30,19 +33,41 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+    setIsLoading(true);
+
     try {
-      setIsLoading(true);
-      const isRegistered = await login(username, password);
-      console.log('Login bem sucedido, usuário registrado:', isRegistered);
+      const response = await loginService.login(username, password);
       
-      // Redireciona com base no estado de registro
+      // Verifica o status de registro antes de gravar os tokens
+      const isRegistered = await userService.checkActivation(username);
+      
+      // Grava o token de acesso
+      tokenService.setAccessToken(response.access_token);
+      
+      // Se o usuário estiver registrado, define o cookie antes de qualquer outra operação
       if (isRegistered) {
-        router.push('/dashboard');
-      } else {
-        router.push('/config');
+        document.cookie = 'is_user_registered=true; path=/';
       }
-    } catch (error) {
-      console.error('Erro no login:', error);
+      
+      // Salva o usuário
+      await login(username, password);
+      
+      // Define o refresh token após o cookie is_user_registered
+      if (response.refresh_token) {
+        tokenService.setRefreshToken(response.refresh_token);
+      }
+      
+      if (!isRegistered) {
+        // Se o usuário não estiver registrado, redireciona para a página de cadastro
+        router.push('/cadastro');
+      } else {
+        // Se o usuário estiver registrado, redireciona para o dashboard
+        router.push('/dashboard');
+      }
+    } catch (err) {
+      console.error('Erro no login:', err);
+      setError('Email ou senha inválidos');
     } finally {
       setIsLoading(false);
     }

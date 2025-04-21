@@ -47,16 +47,11 @@ class LoginService {
 
     const { token, user } = response.data.data;
 
-    // Armazena os tokens usando os novos métodos
-    tokenService.setAccessToken(token.access_token);
-    if (token.refresh_token) {
-      tokenService.setRefreshToken(token.refresh_token);
-    }
-
     // Retorna o formato esperado pelo LoginResponse
     return {
       access_token: token.access_token,
       expires_in: token.expires_in,
+      refresh_token: token.refresh_token,
       user: {
         id: user.username,
         email: user.email,
