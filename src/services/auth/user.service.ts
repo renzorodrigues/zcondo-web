@@ -30,26 +30,20 @@ class UserService {
   }
 
   /**
-   * Cadastra ou atualiza as informações do usuário
-   * @param userData Dados do usuário
+   * Atualiza as informações básicas do usuário
+   * @param userData Dados básicos do usuário
    * @returns Dados do usuário atualizados
    */
-  async updateUserProfile(userData: {
-    firstName: string;
-    lastName: string;
+  async updateUser(userData: {
+    firstname: string;
+    surname: string;
     email: string;
-    phone?: string;
-    cpf?: string;
-    address?: string;
-    city?: string;
-    state?: string;
-    zipCode?: string;
   }) {
     try {
-      const response = await axios.post('/users/profile', userData);
+      const response = await axios.put('/users/update', userData);
       return response.data;
     } catch (error) {
-      console.error('Erro ao atualizar perfil:', error);
+      console.error('Erro ao atualizar usuário:', error);
       throw error;
     }
   }

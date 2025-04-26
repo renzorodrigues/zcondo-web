@@ -35,6 +35,7 @@ export default function UserRegistrationPage() {
     state: '',
     zipCode: '',
   });
+  const [error, setError] = useState('');
 
   // Preenche os dados do formulário com as informações do usuário
   useEffect(() => {
@@ -91,19 +92,33 @@ export default function UserRegistrationPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setError('');
 
     try {
-      // Atualiza o perfil do usuário com os dados do formulário
-      await userService.updateUserProfile(formData);
+      // Atualiza os dados básicos do usuário
+      await userService.updateUser({
+        firstname: formData.firstName,
+        surname: formData.lastName,
+        email: formData.email,
+      });
+
+      // Verifica se o usuário está ativado após a atualização
+      const isRegistered = await userService.checkActivation(formData.email);
       
-      // Após o cadastro bem-sucedido, atualiza o cookie is_user_registered
-      document.cookie = `is_user_registered=true; path=/; max-age=86400; SameSite=Lax; secure`;
-      
-      toast.success('Cadastro realizado com sucesso!');
-      router.push('/dashboard');
+      if (isRegistered) {
+        // Define o cookie de usuário registrado com um pequeno delay para garantir que seja processado
+        document.cookie = 'is_user_registered=true; path=/; max-age=86400; SameSite=Lax; secure';
+        
+        // Pequeno delay para garantir que o cookie seja processado
+        setTimeout(() => {
+          router.replace('/dashboard');
+        }, 100);
+      } else {
+        setError('Não foi possível completar o cadastro. Por favor, tente novamente.');
+      }
     } catch (error) {
-      console.error('Erro ao cadastrar usuário:', error);
-      toast.error('Erro ao cadastrar usuário. Tente novamente.');
+      console.error('Erro ao atualizar usuário:', error);
+      setError('Ocorreu um erro ao atualizar seus dados. Por favor, tente novamente.');
     } finally {
       setIsSubmitting(false);
     }
