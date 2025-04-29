@@ -13,7 +13,6 @@ import { TbLoader3 } from 'react-icons/tb';
 import { userService } from '@/services/auth/user.service';
 import { tokenService } from '@/services/auth/token.service';
 import { loginService } from '@/services/auth/login.service';
-import Cookies from 'js-cookie';
 
 function LoginForm() {
   const router = useRouter();
@@ -49,13 +48,9 @@ function LoginForm() {
       // Verifica o status de registro
       const isRegistered = await userService.checkActivation(username);
       
-      // Define o cookie de registro usando js-cookie
-      Cookies.set('is_user_registered', String(isRegistered), {
-        path: '/',
-        secure: true,
-        sameSite: 'lax',
-        expires: 1 // 1 dia
-      });
+      // Define o cookie de registro
+      const cookieValue = isRegistered ? 'true' : 'false';
+      document.cookie = `is_user_registered=${cookieValue}; path=/; max-age=86400; SameSite=Lax`;
       
       // Define o refresh token
       if (response.refresh_token) {
