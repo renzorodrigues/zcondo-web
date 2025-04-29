@@ -8,7 +8,7 @@ interface ApiResponse<T> {
 
 // Configuração base da API
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1',
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'https://api.zcondo.com.br/api/v1',
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json'
