@@ -1,7 +1,6 @@
 import { api } from '../api';
 import { LoginResponse } from '@/types/auth';
 import { tokenService } from './token.service';
-import { AxiosError } from 'axios';
 
 interface ApiLoginResponse {
   data: {
@@ -49,14 +48,13 @@ export const loginService = {
           role: user.roles[0] || 'user'
         }
       };
-    } catch (error) {
-      if (error instanceof AxiosError) {
-        if (error.response?.status === 401) {
-          throw new Error('Credenciais inválidas');
-        }
-        if (error.response?.status === 403) {
-          throw new Error('Acesso negado');
-        }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      if (error.response?.status === 401) {
+        throw new Error('Credenciais inválidas');
+      }
+      if (error.response?.status === 403) {
+        throw new Error('Acesso negado');
       }
       throw new Error('Erro ao realizar login. Tente novamente mais tarde.');
     }
