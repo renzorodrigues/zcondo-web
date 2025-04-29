@@ -1,12 +1,5 @@
 import { api } from '../api';
-import { RegisterData, AuthResponse, LoginResponse } from '@/types/auth';
-
-interface ApiRegisterResponse {
-  data: {
-    message: string;
-    success: boolean;
-  };
-}
+import { RegisterData, LoginResponse } from '@/types/auth';
 
 export class RegisterService {
   private static instance: RegisterService;

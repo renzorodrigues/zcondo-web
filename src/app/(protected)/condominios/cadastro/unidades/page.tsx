@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { RiBuilding2Line, RiArrowLeftLine, RiAddLine, RiDeleteBinLine, RiHomeLine, RiArrowRightLine } from 'react-icons/ri';
+import { RiBuilding2Line, RiArrowLeftLine, RiDeleteBinLine, RiHomeLine, RiArrowRightLine } from 'react-icons/ri';
 import { TbLoader3 } from 'react-icons/tb';
 import { CondominioSteps } from '@/components/ui/Steps';
 import { toast } from 'react-hot-toast';

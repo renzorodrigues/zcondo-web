@@ -1,9 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { RiVipCrownLine, RiCheckLine, RiIdCardLine, RiHistoryLine, RiLockLine, RiArrowRightLine, RiBuilding2Line } from 'react-icons/ri';
-import { TbLoader3 } from 'react-icons/tb';
-import { toast } from 'react-hot-toast';
+import { RiVipCrownLine, RiCheckLine } from 'react-icons/ri';
 
 interface Plan {
   id: string;
@@ -22,19 +20,8 @@ interface BillingHistory {
   metodo: string;
 }
 
-interface PaymentMethod {
-  id: string;
-  tipo: 'cartao' | 'boleto';
-  ultimosDigitos?: string;
-  bandeira?: string;
-  vencimento?: string;
-  padrao: boolean;
-}
-
 export default function ConfiguracoesAssinaturaPage() {
   const [selectedPlan, setSelectedPlan] = useState<string>('premium');
-  const [billingPeriod, setBillingPeriod] = useState<'mensal' | 'anual'>('mensal');
-  const [isLoading, setIsLoading] = useState(false);
 
   // Mock data - in a real app, this would come from an API
   const plans: Plan[] = [
@@ -106,44 +93,28 @@ export default function ConfiguracoesAssinaturaPage() {
     }
   ];
 
-  const paymentMethods: PaymentMethod[] = [
-    {
-      id: '1',
-      tipo: 'cartao',
-      ultimosDigitos: '4242',
-      bandeira: 'Visa',
-      vencimento: '12/25',
-      padrao: true
-    },
-    {
-      id: '2',
-      tipo: 'boleto',
-      padrao: false
-    }
-  ];
+  // const handlePlanChange = (planId: string) => {
+  //   setSelectedPlan(planId);
+  // };
 
-  const handlePlanChange = (planId: string) => {
-    setSelectedPlan(planId);
-  };
+  // const handleBillingPeriodChange = (period: 'mensal' | 'anual') => {
+  //   setBillingPeriod(period);
+  // };
 
-  const handleBillingPeriodChange = (period: 'mensal' | 'anual') => {
-    setBillingPeriod(period);
-  };
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   setIsLoading(true);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      // Aqui você faria a chamada para a API para atualizar a assinatura
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulando uma chamada à API
-      toast.success('Assinatura atualizada com sucesso!');
-    } catch (error) {
-      console.error('Erro ao atualizar assinatura:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  //   try {
+  //     // Aqui você faria a chamada para a API para atualizar a assinatura
+  //     await new Promise(resolve => setTimeout(resolve, 1500)); // Simulando uma chamada à API
+  //     toast.success('Assinatura atualizada com sucesso!');
+  //   } catch (error) {
+  //     console.error('Erro ao atualizar assinatura:', error);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -188,12 +159,12 @@ export default function ConfiguracoesAssinaturaPage() {
             </div>
             
             <div className="mb-4">
-              <span className="text-3xl font-bold text-gray-900">
+              {/* <span className="text-3xl font-bold text-gray-900">
                 {formatCurrency(billingPeriod === 'anual' ? plan.preco * 10 : plan.preco)}
-              </span>
-              <span className="text-gray-500 ml-1">
+              </span> */}
+              {/* <span className="text-gray-500 ml-1">
                 /{billingPeriod === 'anual' ? 'ano' : 'mês'}
-              </span>
+              </span> */}
             </div>
             
             <ul className="space-y-3 mb-6">

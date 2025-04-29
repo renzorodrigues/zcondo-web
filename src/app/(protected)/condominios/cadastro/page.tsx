@@ -19,7 +19,6 @@ export default function CadastroCondominioPage() {
     email: '',
     cnpj: ''
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -29,7 +28,6 @@ export default function CadastroCondominioPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
     setLoading(true);
 
     try {
@@ -40,7 +38,6 @@ export default function CadastroCondominioPage() {
     } catch (error) {
       console.error('Erro ao cadastrar condomínio:', error);
     } finally {
-      setIsSubmitting(false);
       setLoading(false);
     }
   };

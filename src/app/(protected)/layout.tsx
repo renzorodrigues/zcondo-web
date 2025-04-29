@@ -3,11 +3,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { 
   RiHome4Line,
-  RiLogoutBoxLine,
   RiMenuLine,
   RiBuilding2Line,
-  RiUserSettingsLine,
-  RiLockPasswordLine,
   RiGroupLine,
   RiMoneyDollarCircleLine
 } from 'react-icons/ri';
@@ -16,7 +13,6 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import UserAvatar from './dashboard/components/UserAvatar';
-import { useAuth } from '@/hooks/useAuth';
 
 interface Condominium {
   id: number;
@@ -42,7 +38,6 @@ export default function ProtectedLayout({
   const [isCondominiumDropdownOpen, setIsCondominiumDropdownOpen] = useState(false);
   const isDashboard = pathname === '/dashboard';
   const isRegistration = pathname === '/cadastro';
-  const { logout, user } = useAuth();
   
   // Refs para os dropdowns
   const condominiumDropdownRef = useRef<HTMLDivElement>(null);
@@ -121,10 +116,6 @@ export default function ProtectedLayout({
       type: 'CONDOMINIUM_CHANGED',
       condominiumId: condominium.id
     });
-  };
-
-  const handleLogout = () => {
-    logout();
   };
 
   return (

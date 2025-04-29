@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { userService } from '@/services/auth/user.service';
-import { toast } from 'react-hot-toast';
 import { RiUserLine, RiMailLine, RiPhoneLine, RiMapPinLine, RiLockLine } from 'react-icons/ri';
 
 interface UserProfileData {
@@ -65,8 +64,7 @@ export default function UserRegistrationPage() {
       try {
         // Verifica o status de registro diretamente com o serviço
         const isRegistered = await userService.checkActivation(user.email);
-        console.log('Status de registro verificado:', isRegistered);
-        
+               
         // Se o usuário já estiver registrado, redireciona para o dashboard
         if (isRegistered) {
           // Atualiza o cookie is_user_registered para garantir consistência
@@ -92,7 +90,7 @@ export default function UserRegistrationPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setError('');
+    setError(error);
 
     try {
       // Atualiza os dados básicos do usuário

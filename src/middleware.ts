@@ -26,8 +26,8 @@ const isUserRegistered = (request: NextRequest) => {
   
   // Se o cookie não estiver definido, verifica se o usuário está autenticado
   // Se estiver autenticado, assume que precisa completar o registro
-  const token = request.cookies.get('access_token')?.value;
-  const refreshToken = request.cookies.get('refresh_token')?.value;
+  // const token = request.cookies.get('access_token')?.value;
+  // const refreshToken = request.cookies.get('refresh_token')?.value;
   
   return false;
 };

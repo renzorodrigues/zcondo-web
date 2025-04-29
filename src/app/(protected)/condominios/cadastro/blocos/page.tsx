@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { RiBuilding2Line, RiArrowLeftLine, RiDeleteBinLine } from 'react-icons/ri';
 import { TbLoader3 } from 'react-icons/tb';
 import { CondominioSteps } from '@/components/ui/Steps';
-import { Button } from '@/components/ui/Button';
 
 interface Bloco {
   nome: string;

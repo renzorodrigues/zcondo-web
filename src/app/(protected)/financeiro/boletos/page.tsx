@@ -4,8 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   RiArrowLeftLine,
-  RiSaveLine,
-  RiBuilding2Line
+  RiSaveLine
 } from 'react-icons/ri';
 import { TbLoader3 } from 'react-icons/tb';
 

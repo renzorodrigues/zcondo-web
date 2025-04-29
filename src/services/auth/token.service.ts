@@ -1,11 +1,3 @@
-import { api } from '@/services/api';
-
-interface TokenData {
-  access_token: string;
-  refresh_token?: string;
-  expires_in: number;
-}
-
 class TokenService {
   private static instance: TokenService;
   private accessToken: string | null = null;

@@ -2,13 +2,12 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { RiArrowLeftLine, RiUserAddLine, RiBuilding2Line } from 'react-icons/ri';
+import { RiArrowLeftLine } from 'react-icons/ri';
 import { toast } from 'react-hot-toast';
 import { TbLoader3 } from 'react-icons/tb';
 
 export default function ResidentRegistrationPage() {
   const router = useRouter();
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -40,23 +39,20 @@ export default function ResidentRegistrationPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
     setLoading(true);
 
     try {
       // Aqui você faria a chamada para a API para cadastrar o morador
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulando uma chamada à API
+      //await new Promise(resolve => setTimeout(resolve, 1500)); // Simulando uma chamada à API
       toast.success('Morador cadastrado com sucesso!');
       router.push('/moradores');
     } catch (error) {
       console.error('Erro ao cadastrar morador:', error);
     } finally {
-      setIsSubmitting(false);
       setLoading(false);
     }
   };
 
-  return (
     <div className="max-w-4xl mx-auto p-6">
       <div className="flex items-center mb-6">
         <button 
@@ -284,5 +280,4 @@ export default function ResidentRegistrationPage() {
         </form>
       </div>
     </div>
-  );
 } 

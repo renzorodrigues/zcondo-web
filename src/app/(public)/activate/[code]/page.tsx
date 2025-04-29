@@ -1,13 +1,11 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { useRouter } from 'next/navigation';
 import { RiCheckboxCircleLine, RiErrorWarningLine, RiArrowLeftLine } from 'react-icons/ri';
 import Link from 'next/link';
 import { registerService } from '@/services/auth/register.service';
 
 export default function ActivatePage({ params }: { params: { code: string } }) {
-  const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -20,12 +18,10 @@ export default function ActivatePage({ params }: { params: { code: string } }) {
       
       try {
         activationAttempted.current = true;
-        console.log('Tentando ativar conta com código:', params.code);
         await registerService.activateAccount(params.code);
         setIsSuccess(true);
         setError(null);
-      } catch (err) {
-        console.error('Erro ao ativar conta:', err);
+      } catch {
         setError('Não foi possível ativar sua conta. Por favor, tente novamente.');
         setIsSuccess(false);
       } finally {

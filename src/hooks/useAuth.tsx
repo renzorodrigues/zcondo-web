@@ -23,12 +23,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Lista de rotas públicas que não requerem autenticação
-const publicRoutes = ['/', '/login', '/register', '/register/confirmation', '/landing', '/activate'];
-
-// Função auxiliar para verificar se uma rota é pública
-const isPublicRoute = (pathname: string) => {
-  return publicRoutes.includes(pathname) || pathname.startsWith('/activate/');
-};
+// const publicRoutes = ['/', '/login', '/register', '/register/confirmation', '/landing', '/activate'];
 
 // Chave usada para armazenar dados do usuário no localStorage
 const USER_STORAGE_KEY = 'user_data';
@@ -60,7 +55,6 @@ const clearUserFromStorage = () => {
 const setUserRegisteredCookie = (isRegistered: boolean) => {
   // Define o cookie com opções mais robustas para garantir persistência
   document.cookie = `is_user_registered=${isRegistered}; path=/; max-age=86400; SameSite=Lax; secure`;
-  console.log(`Cookie is_user_registered definido como: ${isRegistered}`);
 };
 
 // Componente AuthProvider que envolve a aplicação e fornece o contexto de autenticação
@@ -164,9 +158,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsAuthenticated(true);
       
       // Verifica se o usuário está registrado
-      console.log('Verificando registro do usuário após login:', userData.email);
       const isRegistered = await userService.checkActivation(userData.email);
-      console.log('Resultado da verificação de registro:', isRegistered);
       setIsUserRegistered(isRegistered);
       
       // Retorna o status de registro para o componente de login fazer o redirecionamento

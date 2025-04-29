@@ -19,12 +19,9 @@ class UserService {
    */
   async checkActivation(email: string): Promise<boolean> {
     try {
-      console.log('Verificando usuário:', email);
       const response = await axios.get(`/users/check-activation/${email}`);
-      console.log('Resposta da verificação:', response.data);
       return response.data;
-    } catch (error) {
-      console.error('Erro ao verificar usuário:', error);
+    } catch {
       return false;
     }
   }
