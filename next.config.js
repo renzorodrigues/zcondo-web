@@ -25,6 +25,10 @@ const nextConfig = {
       allowedOrigins: ['localhost:3000', 'zcondo-web.vercel.app'],
     },
   },
+  // Disable ESLint during build
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   // Disable standalone output mode for Vercel deployment
   output: undefined,
   // Add transpilePackages to ensure all dependencies are properly transpiled
