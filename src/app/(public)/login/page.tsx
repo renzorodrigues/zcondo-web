@@ -27,9 +27,9 @@ function LoginForm() {
   useEffect(() => {
     if (isAuthenticated) {
       // Garante que o redirect seja apenas para rotas válidas
-      const redirect = searchParams?.get('redirect');
+      const redirect = searchParams?.get('redirect') ?? '';
       const validRedirectPaths = ['/dashboard', '/cadastro'];
-      const redirectTo = validRedirectPaths.includes(redirect || '') ? redirect : '/dashboard';
+      const redirectTo = validRedirectPaths.includes(redirect) ? redirect : '/dashboard';
       router.replace(redirectTo);
     }
   }, [isAuthenticated, router, searchParams]);
@@ -64,9 +64,9 @@ function LoginForm() {
         router.replace('/cadastro');
       } else {
         // Garante que o redirect seja apenas para rotas válidas
-        const redirect = searchParams?.get('redirect');
+        const redirect = searchParams?.get('redirect') ?? '';
         const validRedirectPaths = ['/dashboard'];
-        const redirectTo = validRedirectPaths.includes(redirect || '') ? redirect : '/dashboard';
+        const redirectTo = validRedirectPaths.includes(redirect) ? redirect : '/dashboard';
         router.replace(redirectTo);
       }
     } catch (err) {
