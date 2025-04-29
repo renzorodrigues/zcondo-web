@@ -50,7 +50,7 @@ export default function LoginPage() {
         document.cookie = 'is_user_registered=true; path=/';
       }
       
-      // Salva o usuário
+      // Salva o usuário e atualiza o estado de autenticação
       await login(username, password);
       
       // Define o refresh token após o cookie is_user_registered
@@ -58,12 +58,12 @@ export default function LoginPage() {
         tokenService.setRefreshToken(response.refresh_token);
       }
       
+      // Redireciona com base no status de registro
       if (!isRegistered) {
-        // Se o usuário não estiver registrado, redireciona para a página de cadastro
         router.push('/cadastro');
       } else {
-        // Se o usuário estiver registrado, redireciona para o dashboard
-        router.push('/dashboard');
+        const redirectTo = searchParams?.get('redirect') || '/dashboard';
+        router.push(redirectTo);
       }
     } catch (err) {
       console.error('Erro no login:', err);

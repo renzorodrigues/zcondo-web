@@ -68,33 +68,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Função para verificar o status de autenticação
   const checkAuth = useCallback(async () => {
     try {
-      // Primeiro tenta obter o usuário do localStorage para evitar chamadas desnecessárias à API
-      const storedUser = getUserFromStorage();
-      if (storedUser) {
-        setUser(storedUser);
-        setIsAuthenticated(true);
-        try {
-          const isRegistered = await userService.checkActivation(storedUser.email);
-          setIsUserRegistered(isRegistered);
-          setUserRegisteredCookie(isRegistered);
-        } catch (error) {
-          console.error('Erro ao verificar registro do usuário:', error);
-        }
-        return;
-      }
-
-      // Verifica se temos um token
+      // Primeiro verifica se temos um token válido
       const token = tokenService.getAccessToken();
-      if (!token) {
-        setIsAuthenticated(false);
-        setIsUserRegistered(false);
-        setUser(null);
-        return;
-      }
-
-      // Verifica se o token é válido
-      const isValid = !tokenService.isTokenExpired();
-      if (!isValid) {
+      if (!token || tokenService.isTokenExpired()) {
         tokenService.clearTokens();
         setIsAuthenticated(false);
         setIsUserRegistered(false);
@@ -103,43 +79,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      // Se já estiver autenticado e tiver usuário, apenas verifica o status de registro
-      if (isAuthenticated && user) {
-        const isRegistered = await userService.checkActivation(user.email);
-        setIsUserRegistered(isRegistered);
-        setUserRegisteredCookie(isRegistered);
+      // Se já temos os dados do usuário no localStorage e estamos autenticados,
+      // apenas verifica o status de registro se necessário
+      const storedUser = getUserFromStorage();
+      if (storedUser && isAuthenticated) {
+        setUser(storedUser);
+        if (!isUserRegistered) {
+          const isRegistered = await userService.checkActivation(storedUser.email);
+          setIsUserRegistered(isRegistered);
+          setUserRegisteredCookie(isRegistered);
+        }
         return;
       }
 
-      setIsAuthenticated(true);
-
-      // Se não tiver no localStorage, busca do perfil da API
+      // Se não temos os dados do usuário, busca do perfil da API
       const response = await apiService.getProfile();
       const userData = response.data.data;
+      
+      if (!userData?.email) {
+        throw new Error('Email do usuário não encontrado');
+      }
+
       setUser(userData);
       saveUserToStorage(userData);
-
-      // Verifica se o usuário está registrado usando o email
-      if (!userData?.email) {
-        console.error('Email do usuário não encontrado');
-        return;
-      }
+      setIsAuthenticated(true);
 
       const isRegistered = await userService.checkActivation(userData.email);
       setIsUserRegistered(isRegistered);
       setUserRegisteredCookie(isRegistered);
     } catch (error) {
       console.error('Erro ao verificar autenticação:', error);
-      // Em caso de erro, mantém os dados do usuário se existirem
-      const storedUser = getUserFromStorage();
-      if (storedUser) {
-        setUser(storedUser);
-        setIsAuthenticated(true);
-      }
+      // Em caso de erro, limpa o estado
+      tokenService.clearTokens();
+      setIsAuthenticated(false);
+      setIsUserRegistered(false);
+      setUser(null);
+      clearUserFromStorage();
     } finally {
       setIsLoading(false);
     }
-  }, [router, user, isAuthenticated]);
+  }, [isAuthenticated, isUserRegistered]);
 
   // Verifica a autenticação quando o componente é montado
   useEffect(() => {

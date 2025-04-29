@@ -1,6 +1,7 @@
-import { api } from '@/services/api';
+import { api } from '../api';
 import { LoginResponse } from '@/types/auth';
 import { tokenService } from './token.service';
+import { AxiosError } from 'axios';
 
 interface ApiLoginResponse {
   data: {
@@ -23,45 +24,45 @@ interface ApiLoginResponse {
   };
 }
 
-class LoginService {
-  private static instance: LoginService;
+export const loginService = {
+  async login(username: string, password: string): Promise<LoginResponse> {
+    try {
+      const response = await api.post<ApiLoginResponse>('/authentication/login', {
+        username,
+        password,
+      });
 
-  private constructor() { }
-
-  public static getInstance(): LoginService {
-    if (!LoginService.instance) {
-      LoginService.instance = new LoginService();
-    }
-    return LoginService.instance;
-  }
-
-  public async login(username: string, password: string): Promise<LoginResponse> {
-    const response = await api.post<ApiLoginResponse>('/authentication/login', {
-      username,
-      password
-    });
-
-    if (!response.data?.data?.token?.access_token) {
-      throw new Error('No access token received');
-    }
-
-    const { token, user } = response.data.data;
-
-    // Retorna o formato esperado pelo LoginResponse
-    return {
-      access_token: token.access_token,
-      expires_in: token.expires_in,
-      refresh_token: token.refresh_token,
-      user: {
-        id: user.username,
-        email: user.email,
-        name: user.name,
-        role: user.roles[0] || 'user'
+      if (!response.data?.data?.token?.access_token) {
+        throw new Error('Token de acesso não recebido');
       }
-    };
-  }
 
-  public async logout(): Promise<void> {
+      const { token, user } = response.data.data;
+
+      return {
+        access_token: token.access_token,
+        expires_in: token.expires_in,
+        refresh_token: token.refresh_token,
+        user: {
+          id: user.username,
+          email: user.email,
+          name: user.name,
+          role: user.roles[0] || 'user'
+        }
+      };
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        if (error.response?.status === 401) {
+          throw new Error('Credenciais inválidas');
+        }
+        if (error.response?.status === 403) {
+          throw new Error('Acesso negado');
+        }
+      }
+      throw new Error('Erro ao realizar login. Tente novamente mais tarde.');
+    }
+  },
+
+  async logout(): Promise<void> {
     try {
       // Primeiro limpa os tokens
       tokenService.clearTokens();
@@ -79,6 +80,4 @@ class LoginService {
       tokenService.clearTokens();
     }
   }
-}
-
-export const loginService = LoginService.getInstance(); 
+}; 
