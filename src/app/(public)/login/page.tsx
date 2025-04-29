@@ -24,51 +24,53 @@ function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      // Garante que o redirect seja apenas para rotas válidas
-      const redirect = searchParams?.get('redirect') ?? '';
-      const validRedirectPaths = ['/dashboard', '/cadastro'];
-      const redirectTo = validRedirectPaths.includes(redirect) ? redirect : '/dashboard';
-      router.replace(redirectTo);
-    }
-  }, [isAuthenticated, router, searchParams]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
 
     try {
+      console.log('Iniciando processo de login...');
       const response = await loginService.login(username, password);
+      console.log('Login realizado com sucesso, resposta:', response);
       
       // Grava o token de acesso primeiro
       tokenService.setAccessToken(response.access_token);
+      console.log('Token de acesso gravado');
       
       // Verifica o status de registro
       const isRegistered = await userService.checkActivation(username);
+      console.log('Status de registro:', isRegistered);
       
       // Define o cookie de registro
       const cookieValue = isRegistered ? 'true' : 'false';
       document.cookie = `is_user_registered=${cookieValue}; path=/; max-age=86400; SameSite=Lax`;
+      console.log('Cookie de registro definido:', cookieValue);
       
       // Define o refresh token
       if (response.refresh_token) {
         tokenService.setRefreshToken(response.refresh_token);
+        console.log('Refresh token gravado');
       }
       
       // Atualiza o estado de autenticação
       await login(username, password);
+      console.log('Estado de autenticação atualizado');
+      
+      // Pequeno delay para garantir que os cookies foram processados
+      await new Promise(resolve => setTimeout(resolve, 100));
       
       // Redireciona com base no status de registro
       if (!isRegistered) {
-        router.replace('/cadastro');
+        console.log('Redirecionando para cadastro...');
+        window.location.href = '/cadastro';
       } else {
         // Garante que o redirect seja apenas para rotas válidas
         const redirect = searchParams?.get('redirect') ?? '';
         const validRedirectPaths = ['/dashboard'];
         const redirectTo = validRedirectPaths.includes(redirect) ? redirect : '/dashboard';
-        router.replace(redirectTo);
+        console.log('Redirecionando para:', redirectTo);
+        window.location.href = redirectTo;
       }
     } catch (err) {
       console.error('Erro no login:', err);
