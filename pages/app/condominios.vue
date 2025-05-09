@@ -1,11 +1,8 @@
 <script setup lang="ts">
-
 definePageMeta({
-  public: true
+    layout: 'app'
 })
-
 </script>
-
 <template>
-  <h1>AQUI SERÁ A LANDING PAGE</h1>
+    <h1>CONDOMINIOS</h1>
 </template>

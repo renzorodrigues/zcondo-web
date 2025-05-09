@@ -5,8 +5,8 @@
           <NuxtLink to="/" class="text-xl font-bold text-blue-600">ZCondo</NuxtLink>
   
           <div>
-            <NuxtLink to="/login" class="text-blue-600 hover:underline mr-4">Login</NuxtLink>
-            <NuxtLink to="/register" class="text-blue-600 hover:underline">Registrar</NuxtLink>
+            <NuxtLink to="/auth/login" class="text-blue-600 hover:underline mr-4">Login</NuxtLink>
+            <NuxtLink to="/auth/register" class="text-blue-600 hover:underline">Registrar</NuxtLink>
           </div>
         </div>
       </header>

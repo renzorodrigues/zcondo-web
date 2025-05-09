@@ -2,7 +2,11 @@
 export default defineNuxtConfig({
   css: ['@/assets/css/tailwind.css'],
 
-  modules: ['@pinia/nuxt', 'shadcn-nuxt'],
+  modules: [
+    '@pinia/nuxt',
+    'shadcn-nuxt',
+    'pinia-plugin-persistedstate/nuxt'
+  ],
 
   postcss: {
     plugins: {
@@ -13,7 +17,7 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      apiBase: 'https://api.zcondo.com.br'
+      apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:5000'
     }
   },
 

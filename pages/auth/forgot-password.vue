@@ -1,7 +1,9 @@
-<script setup>
+<script setup lang="ts">
+
 definePageMeta({
-  layout: 'public'
+  public: true
 })
+
 </script>
 
 <template>
