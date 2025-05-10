@@ -1,8 +1,14 @@
+<script setup lang="ts">
+import AppSidebar from '~/components/layout/AppSidebar.vue'
+import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
+</script>
+
 <template>
-    <header class="bg-blue-600 text-white p-4">
-        <h1 class="text-xl">ZCondo</h1>
-    </header>
+  <SidebarProvider>
+    <AppSidebar />
     <main>
-        <NuxtPage />
+      <SidebarTrigger />
+      <RouterView />
     </main>
+  </SidebarProvider>
 </template>
