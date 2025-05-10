@@ -1,11 +1,14 @@
-<script setup lang="ts">
-
+<script setup>
 definePageMeta({
-  public: true
-})
-
+  layout: "landing",
+});
 </script>
 
 <template>
-  <h1>AQUI SERÁ A LANDING PAGE</h1>
+  <LandingContainer>
+    <LandingHero></LandingHero>
+    <LandingFeatures></LandingFeatures>
+    <LandingLogos></LandingLogos>
+    <LandingCta></LandingCta>
+  </LandingContainer>
 </template>

@@ -4,7 +4,6 @@ import { login as loginApi } from '@/lib/api/authService'
 import { refresh as refreshApi } from '@/lib/api/authService'
 import { logout as logoutApi } from '@/lib/api/authService'
 import { checkActivation as checkActivationApi } from '@/lib/api/userService'
-import { protegido as protegidoApi } from '@/lib/api/authService'
 
 export interface User {
   username: string
@@ -27,8 +26,8 @@ export const useAuthStore = defineStore('auth', () => {
   // ACTIONS
   function setUser(newUser: User, refreshExpiresIn: number) {
     user.value = newUser
-    const userCookie = useCookie('user', { maxAge: refreshExpiresIn });
-    userCookie.value = JSON.stringify(newUser)
+    const userCookie = useCookie('user', { maxAge: refreshExpiresIn, encode: JSON.stringify, decode: JSON.parse });
+    userCookie.value = newUser
   }
 
   function clearUser() {
@@ -75,13 +74,6 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  // LOGOUT
-  async function protegido() {
-    await protegidoApi()
-    const isProfileCompletedCookie = useCookie('isProfileCompleted')
-    isProfileCompletedCookie.value = 'true'
-  }
-
   return {
     accessToken,
     user,
@@ -92,8 +84,7 @@ export const useAuthStore = defineStore('auth', () => {
     setAccessToken,
     login,
     refresh,
-    logout,
-    protegido
+    logout
   }
 }, {
   persist: import.meta.client

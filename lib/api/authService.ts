@@ -49,12 +49,9 @@ export async function refresh(): Promise<LoginResponse> {
       method: 'POST',
       credentials: 'include'
     })
-
-    console.log('🔍 Resposta crua do refresh:', raw)
-
     return raw as LoginResponse // força o tipo sem travar o catch
   } catch (err: any) {
-    console.error('❌ Erro real no refresh:', err)
+    console.error('Erro real no refresh:', err)
     throw createError({ statusCode: 401, statusMessage: 'Erro ao renovar token', cause: err })
   }
 }
@@ -70,14 +67,4 @@ export async function logout(): Promise<void> {
   } catch (err) {
     throw createError({ statusCode: 500, statusMessage: 'Erro ao fazer logout', cause: err })
   }
-}
-
-// TESTE - PODE APAGAR DEPOIS
-export async function protegido(): Promise<void> {
-  const config = useRuntimeConfig()
-  // await $fetch('/api/v1/authentication/protegido', {
-  //   baseURL: config.public.apiBase,
-  //   method: 'GET',
-  //   credentials: 'include'
-  // })
 }

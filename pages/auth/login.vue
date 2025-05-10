@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
 definePageMeta({
-  public: true
+  layout: 'landing',
 })
 
 import { z } from 'zod'
