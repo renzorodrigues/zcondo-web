@@ -17,7 +17,7 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      apiBase: process.env.NUXT_PUBLIC_API_BASE
+      apiBase: 'https://api.zcondo.com.br' //process.env.NUXT_PUBLIC_API_BASE
     }
   },
 
