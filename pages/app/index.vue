@@ -17,7 +17,6 @@ import DateRangePicker from '@/components/dashboard/DateRangePicker.vue'
 import MainNav from '@/components/dashboard/MainNav.vue'
 import Overview from '@/components/dashboard/Overview.vue'
 import RecentSales from '@/components/dashboard/RecentSales.vue'
-
 import Search from '@/components/dashboard/Search.vue'
 import TeamSwitcher from '@/components/dashboard/TeamSwitcher.vue'
 import UserNav from '@/components/dashboard/UserNav.vue'
@@ -27,9 +26,9 @@ definePageMeta({
 </script>
 
 <template>
-  <div class="hidden flex-col md:flex">
-    <div class="border-b">
-      <div class="flex h-16 items-center px-4">
+  <div class="flex flex-col flex-1 w-full min-h-screen">
+    <div class="border-b w-full">
+      <div class="flex h-16 items-center px-4 w-full">
         <TeamSwitcher />
         <MainNav class="mx-6" />
         <div class="ml-auto flex items-center space-x-4">
@@ -38,8 +37,8 @@ definePageMeta({
         </div>
       </div>
     </div>
-    <div class="flex-1 space-y-4 p-8 pt-6">
-      <div class="flex items-center justify-between space-y-2">
+    <div class="flex-1 p-8 pt-6 w-full">
+      <div class="flex items-center justify-between space-y-2 w-full">
         <h2 class="text-3xl font-bold tracking-tight">
           Dashboard
         </h2>
@@ -48,8 +47,8 @@ definePageMeta({
           <Button>Download</Button>
         </div>
       </div>
-      <Tabs default-value="overview" class="space-y-4">
-        <TabsList>
+      <Tabs default-value="overview" class="space-y-4 mt-4 w-full">
+        <TabsList class="w-full">
           <TabsTrigger value="overview">
             Overview
           </TabsTrigger>
@@ -63,8 +62,8 @@ definePageMeta({
             Notifications
           </TabsTrigger>
         </TabsList>
-        <TabsContent value="overview" class="space-y-4">
-          <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <TabsContent value="overview" class="space-y-4 w-full">
+          <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4 w-full">
             <Card>
               <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle class="text-sm font-medium">
@@ -145,7 +144,7 @@ definePageMeta({
               </CardContent>
             </Card>
           </div>
-          <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+          <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-7 w-full">
             <Card class="col-span-4">
               <CardHeader>
                 <CardTitle>Overview</CardTitle>
