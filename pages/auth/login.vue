@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
 definePageMeta({
-  layout: 'landing',
+    layout: 'landing',
 })
 
 import { z } from 'zod'
@@ -61,7 +61,7 @@ async function onSubmit() {
 </script>
 
 <template>
-    <div class="w-full h-screen flex items-center justify-center px-4">
+    <div class="w-full p-5 pt-20 px-4">
         <Card class="mx-auto max-w-sm w-full">
             <CardHeader>
                 <CardTitle class="text-2xl">Login</CardTitle>

@@ -25,6 +25,14 @@ export interface LoginResponse {
   }
 }
 
+export interface RegisterPayload {
+  firstname: string
+  lastname: string
+  email: string
+  password: string
+  passwordConfirmation: string
+}
+
 export async function login(payload: LoginPayload): Promise<LoginResponse> {
   const config = useRuntimeConfig()
   try {
@@ -53,6 +61,31 @@ export async function refresh(): Promise<LoginResponse> {
   } catch (err: any) {
     console.error('Erro real no refresh:', err)
     throw createError({ statusCode: 401, statusMessage: 'Erro ao renovar token', cause: err })
+  }
+}
+
+export async function register(payload: RegisterPayload): Promise<void> {
+  const config = useRuntimeConfig()
+  try {
+    await $fetch('/api/v1/authentication/register', {
+      baseURL: config.public.apiBase,
+      method: 'POST',
+      body: payload,
+    })
+  } catch (err: any) {
+    throw createError({ statusCode: err.statusCode, statusMessage: 'Erro ao registrar', cause: err })
+  }
+}
+
+export async function activate(code: string): Promise<void> {
+  const config = useRuntimeConfig()
+  try {
+    await $fetch(`/api/v1/authentication/activate/${code}`, {
+      baseURL: config.public.apiBase,
+      method: 'PATCH',
+    })
+  } catch (err: any) {
+    throw createError({ statusCode: err.statusCode, statusMessage: 'Erro ao ativar a conta', cause: err })
   }
 }
 

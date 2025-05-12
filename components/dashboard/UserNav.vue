@@ -17,8 +17,19 @@ import {
 } from '@/components/ui/dropdown-menu'
 
 const auth = useAuthStore()
-
+const user = useCookie<User | null>('user')
 const logout = () => auth.logout()
+
+const initials = computed(() => {
+    const name = user.value?.name || ''
+    return name
+        .split(' ')
+        .filter(Boolean)
+        .map((n: string) => n[0])
+        .filter((_: string, i: number, arr: string[]) => i === 0 || i === arr.length - 1)
+        .join('')
+        .toUpperCase()
+})
 </script>
 
 <template>
@@ -27,7 +38,7 @@ const logout = () => auth.logout()
       <Button variant="ghost" class="relative h-8 w-8 rounded-full">
         <Avatar class="h-8 w-8">
           <AvatarImage src="/avatars/01.png" alt="@shadcn" />
-          <AvatarFallback>SC</AvatarFallback>
+          <AvatarFallback>{{ initials }}</AvatarFallback>
         </Avatar>
       </Button>
     </DropdownMenuTrigger>
@@ -35,10 +46,10 @@ const logout = () => auth.logout()
       <DropdownMenuLabel class="font-normal flex">
         <div class="flex flex-col space-y-1">
           <p class="text-sm font-medium leading-none">
-            shadcn
+            {{ user?.name }}
           </p>
           <p class="text-xs leading-none text-muted-foreground">
-            m@example.com
+            {{ user?.email }}
           </p>
         </div>
       </DropdownMenuLabel>

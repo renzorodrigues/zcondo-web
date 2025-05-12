@@ -2,6 +2,8 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { login as loginApi } from '@/lib/api/authService'
 import { refresh as refreshApi } from '@/lib/api/authService'
+import { register as registerApi } from '@/lib/api/authService'
+import { activate as activateApi } from '@/lib/api/authService'
 import { logout as logoutApi } from '@/lib/api/authService'
 import { checkActivation as checkActivationApi } from '@/lib/api/userService'
 
@@ -62,6 +64,22 @@ export const useAuthStore = defineStore('auth', () => {
     isRefreshing.value = false
   }
 
+  // REGISTER
+  async function register(
+    firstname: string,
+    lastname: string,
+    email: string,
+    password: string,
+    passwordConfirmation: string): Promise<void> {
+    await registerApi({ firstname, lastname, email, password, passwordConfirmation })
+  }
+
+  // ACTIVATE
+  async function activate(code: string): Promise<void> {
+    await activateApi(code)
+  }
+
+
   // LOGOUT
   async function logout() {
     try {
@@ -84,6 +102,8 @@ export const useAuthStore = defineStore('auth', () => {
     setAccessToken,
     login,
     refresh,
+    register,
+    activate,
     logout
   }
 }, {
