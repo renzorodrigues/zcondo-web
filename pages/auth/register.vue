@@ -7,33 +7,22 @@ definePageMeta({
 
 import { toTypedSchema } from '@vee-validate/zod'
 import * as z from 'zod'
-import { h } from 'vue'
 import { useForm } from 'vee-validate'
-import { LucideEye, LucideEyeClosed, Loader2 } from 'lucide-vue-next'
-import { GalleryVerticalEnd } from 'lucide-vue-next'
-import { Search } from 'lucide-vue-next'
+import { LucideEye, LucideEyeClosed, Loader2, UserCheck } from 'lucide-vue-next'
 
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from '@/components/ui/form'
 import { Toaster } from '@/components/ui/toast'
-import { useToast } from '@/components/ui/toast/use-toast'
-
-const { toast } = useToast()
 
 const { register } = useAuthStore()
 
-const form = reactive({
-  email: '',
-  password: ''
-})
-
-const errors = ref<{ email?: string[]; password?: string[] }>({})
+const registered = ref(false)
 const apiError = ref('')
 const loading = ref(false)
 const showPassword = ref(false)
+const email = ref('')
 
 const rawSchema = z
   .object({
@@ -63,21 +52,29 @@ const { isFieldDirty, handleSubmit } = useForm({
 })
 
 const onSubmit = handleSubmit(async (values) => {
-  toast({
-    title: 'You submitted the following values:',
-    description: h('pre', { class: 'mt-2 w-[340px] rounded-md bg-slate-950 p-4' }, h('code', { class: 'text-white' }, JSON.stringify(values, null, 2))),
-  })
-  await register(
-    values.firstname,
-    values.lastname,
-    values.email,
-    values.password,
-    values.confirmPassword)
+  try {
+    loading.value = true
+    apiError.value = ''
+    await register(
+      values.firstname,
+      values.lastname,
+      values.email,
+      values.password,
+      values.confirmPassword)
+
+    email.value = values.email
+    registered.value = true
+  } catch (err) {
+    console.error(err)
+    apiError.value = 'Erro ao cadastrar usuário'
+  } finally {
+    loading.value = false
+  }
 })
 </script>
 
 <template>
-  <div class="w-full p-5 pt-20 px-4">
+  <div v-if="!registered" class="w-full p-5 pt-20 px-4">
     <Card class="mx-auto max-w-lg w-full">
       <CardHeader>
         <CardTitle class="text-2xl">Cadastro</CardTitle>
@@ -138,20 +135,26 @@ const onSubmit = handleSubmit(async (values) => {
             </FormItem>
           </FormField>
           <Toaster />
-          <Button type="submit" class="bg-green-600 hover:bg-green-500" @click="() => {
-            toast({
-              title: 'Scheduled: Catch up',
-              description: 'Friday, February 10, 2023 at 5:57 PM',
-            });
-          }">
-            14 Dias Grátis
+          <Button type="submit" class="bg-green-600 hover:bg-green-500" :disabled="loading">
+            <Loader2 v-if="loading" class="w-4 h-4 mr-2 animate-spin" />
+            {{ loading ? 'Cadastrando...' : '14 Dias Grátis' }}
           </Button>
         </form>
       </CardContent>
     </Card>
   </div>
-  <!-- <div class="hidden lg:block">
-      <img class="rounded-full transition-transform transform hover:scale-125" src="/public/img/buildings.png"
-        alt="Starship starts the engine" loading="eager" format="avif" width="650" height="512" />
-    </div> -->
+  <!-- Card de Cadastrado com sucesso -->
+  <div v-if="registered" class="w-full p-5 pt-20 px-4">
+    <Card class="mx-auto max-w-sm w-full">
+      <CardHeader>
+        <CardTitle class="text-2xl text-center">
+          Cadastrado com sucesso!
+        </CardTitle>
+      </CardHeader>
+      <CardContent class="flex flex-col items-center">
+        <UserCheck class="w-12 h-12 text-green-600" />
+        <p class="text-center mt-4">Foi enviado um email de ativação para {{ email }}</p>
+      </CardContent>
+    </Card>
+  </div>
 </template>
