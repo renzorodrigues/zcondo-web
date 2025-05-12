@@ -29,10 +29,15 @@ const rawSchema = z
     firstname: z.string().min(3, { message: 'O nome deve ter no mínimo 3 caracteres' }).max(50),
     lastname: z.string().min(3, { message: 'O sobrenome deve ter no mínimo 3 caracteres' }).max(50),
     email: z.string().email({ message: 'Digite um e-mail válido' }),
-    password: z.string().min(3, { message: 'A senha deve ter no mínimo 3 caracteres' }).max(50),
+    password: z.string()
+    .min(8, { message: 'A senha deve ter no mínimo 8 caracteres' })
+    .regex(/[A-Z]/, { message: 'A senha deve ter pelo menos uma letra maiúscula' })
+    .regex(/[a-z]/, { message: 'A senha deve ter pelo menos uma letra minúscula' })
+    .regex(/[0-9]/, { message: 'A senha deve ter pelo menos um número' })
+    .max(50),
     confirmPassword: z
       .string()
-      .min(3, { message: 'A senha deve ter no mínimo 3 caracteres' })
+      .min(8, { message: 'A senha deve ter no mínimo 8 caracteres' })
       .max(50),
   })
   .superRefine((data, ctx) => {
