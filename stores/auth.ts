@@ -76,7 +76,12 @@ export const useAuthStore = defineStore('auth', () => {
 
   // ACTIVATE
   async function activate(code: string): Promise<void> {
-    await activateApi(code)
+    try {
+      await activateApi(code)
+    } catch (error) {
+      console.error('AUTH Erro ao ativar conta:', error)
+      throw error
+    }
   }
 
 

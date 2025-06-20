@@ -8,7 +8,7 @@ definePageMeta({
 import { toTypedSchema } from '@vee-validate/zod'
 import * as z from 'zod'
 import { useForm } from 'vee-validate'
-import { LucideEye, LucideEyeClosed, Loader2, UserCheck } from 'lucide-vue-next'
+import { LucideEye, LucideEyeClosed, Loader2, UserCheck, AlertTriangle } from 'lucide-vue-next'
 
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -30,11 +30,11 @@ const rawSchema = z
     lastname: z.string().min(3, { message: 'O sobrenome deve ter no mínimo 3 caracteres' }).max(50),
     email: z.string().email({ message: 'Digite um e-mail válido' }),
     password: z.string()
-    .min(8, { message: 'A senha deve ter no mínimo 8 caracteres' })
-    .regex(/[A-Z]/, { message: 'A senha deve ter pelo menos uma letra maiúscula' })
-    .regex(/[a-z]/, { message: 'A senha deve ter pelo menos uma letra minúscula' })
-    .regex(/[0-9]/, { message: 'A senha deve ter pelo menos um número' })
-    .max(50),
+      .min(8, { message: 'A senha deve ter no mínimo 8 caracteres' })
+      .regex(/[A-Z]/, { message: 'A senha deve ter pelo menos uma letra maiúscula' })
+      .regex(/[a-z]/, { message: 'A senha deve ter pelo menos uma letra minúscula' })
+      .regex(/[0-9]/, { message: 'A senha deve ter pelo menos um número' })
+      .max(50),
     confirmPassword: z
       .string()
       .min(8, { message: 'A senha deve ter no mínimo 8 caracteres' })
@@ -69,9 +69,12 @@ const onSubmit = handleSubmit(async (values) => {
 
     email.value = values.email
     registered.value = true
-  } catch (err) {
-    console.error(err)
-    apiError.value = 'Erro ao cadastrar usuário'
+  } catch (err: any) {
+    if (err.statusCode === 409) {
+      apiError.value = 'E-mail já cadastrado'
+    } else {
+      apiError.value = 'Erro ao cadastrar usuário'
+    }
   } finally {
     loading.value = false
   }
@@ -79,7 +82,7 @@ const onSubmit = handleSubmit(async (values) => {
 </script>
 
 <template>
-  <div v-if="!registered" class="w-full p-5 pt-20 px-4">
+  <div v-if="!registered && !apiError" class="w-full p-5 pt-20 px-4">
     <Card class="mx-auto max-w-lg w-full">
       <CardHeader>
         <CardTitle class="text-2xl">Cadastro</CardTitle>
@@ -158,7 +161,23 @@ const onSubmit = handleSubmit(async (values) => {
       </CardHeader>
       <CardContent class="flex flex-col items-center">
         <UserCheck class="w-12 h-12 text-green-600" />
-        <p class="text-center mt-4">Foi enviado um email de ativação para {{ email }}</p>
+        <p class="text-center mt-4">Foi enviado um email de ativação para <b>{{ email }}</b></p>
+      </CardContent>
+    </Card>
+  </div>
+  <div v-if="!registered && apiError" class="w-full p-5 pt-20 px-4">
+    <Card class="mx-auto max-w-sm w-full">
+      <CardHeader>
+        <CardTitle class="text-2xl text-center">
+          Erro no cadastro
+        </CardTitle>
+      </CardHeader>
+      <CardContent class="flex flex-col items-center">
+        <AlertTriangle class="w-12 h-12 text-yellow-600" />
+        <p class="text-center mt-4">{{ apiError }}</p>
+        <Button @click="apiError = ''" class="w-full mt-4" :disabled="loading">
+          Voltar
+        </Button>
       </CardContent>
     </Card>
   </div>

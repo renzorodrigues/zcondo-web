@@ -25,7 +25,7 @@ async function onSubmit() {
         activated.value = true
     } catch (err) {
         console.error(err)
-        errorMessage.value = 'Código de ativação inválido'
+        errorMessage.value = 'Código de ativação não encontrado ou já utilizado.'
     }
     finally {
         loading.value = false
@@ -37,29 +37,23 @@ async function onSubmit() {
     <!-- Card de Ativação -->
     <div v-if="!activated && !errorMessage" class="w-full p-5 pt-20 px-4">
         <Card class="mx-auto max-w-sm w-full">
-            <CardHeader>
-                <CardTitle class="text-2xl">Ativação</CardTitle>
-                <CardDescription>Ative a sua conta</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <Button @click="onSubmit" class="w-full" :disabled="loading">
-                    <Loader2 v-if="loading" class="w-4 h-4 mr-2 animate-spin" />
-                    {{ loading ? 'Ativando...' : 'Ativar' }}
-                </Button>
-            </CardContent>
+            <Button @click="onSubmit" class="w-full bg-green-600 hover:bg-green-500" :disabled="loading">
+                <Loader2 v-if="loading" class="w-4 h-4 mr-2 animate-spin" />
+                {{ loading ? 'Ativando...' : 'Ativar Conta' }}
+            </Button>
         </Card>
     </div>
     <!-- Card de Sucesso -->
     <div v-if="activated" class="w-full p-5 pt-20 px-4">
         <Card class="mx-auto max-w-sm w-full">
             <CardHeader>
-                <CardTitle class="text-2xl text-center text-green-600">
+                <CardTitle class="text-2xl text-center">
                     Conta ativada com sucesso!
                 </CardTitle>
             </CardHeader>
             <CardContent class="flex flex-col items-center">
                 <LucideCheck class="w-12 h-12 text-green-600" />
-                <p class="text-center mt-4 text-green-600">Agora você pode fazer login.</p>
+                <p class="text-center mt-4">Agora você pode fazer login.</p>
             </CardContent>
         </Card>
     </div>

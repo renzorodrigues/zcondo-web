@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import ProfileForm from '@/components/app/profile/ProfileForm.vue'
-// import FormsLayout from './layouts/FormsLayout.vue'
 definePageMeta({
   layout: 'profile',
 })
@@ -12,7 +10,8 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage } from '@/components/ui/form'
+  FormMessage
+} from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import {
   Select,
@@ -28,16 +27,25 @@ import {
   StepperItem,
   StepperSeparator,
   StepperTitle,
-  StepperTrigger } from '@/components/ui/stepper'
+  StepperTrigger
+} from '@/components/ui/stepper'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { toast } from '@/components/ui/toast'
 import { toTypedSchema } from '@vee-validate/zod'
-import { Check, Circle, Dot } from 'lucide-vue-next'
+import { Check, Circle, Dot, CalendarIcon } from 'lucide-vue-next'
 import { h, ref } from 'vue'
 import * as z from 'zod'
+import CalendarMonthYear from '~/components/shared/CalendarMonthYear.vue'
+
+const auth = useAuthStore()
+const firstname = auth.user?.name?.split(' ')[0]
+const surname = auth.user?.name?.split(' ')[1]
+const email = auth.user?.email
 
 const formSchema = [
   z.object({
-    fullName: z.string(),
+    firstname: z.string(),
+    surname: z.string(),
     email: z.string().email(),
   }),
   z.object({
@@ -85,42 +93,34 @@ function onSubmit(values: any) {
 </script>
 
 <template>
-  <Form
-    v-slot="{ meta, values, validate }"
-    as="" keep-values :validation-schema="toTypedSchema(formSchema[stepIndex - 1])"
-  >
+  <Form v-slot="{ meta, values, setFieldValue, validate }" as="" keep-values
+    :validation-schema="toTypedSchema(formSchema[stepIndex - 1])">
     <Stepper v-slot="{ isNextDisabled, isPrevDisabled, nextStep, prevStep }" v-model="stepIndex" class="block w-full">
-      <form
-        @submit="(e) => {
-          e.preventDefault()
-          validate()
+      <form @submit="(e) => {
+        e.preventDefault()
+        validate()
 
-          if (stepIndex === steps.length && meta.valid) {
-            onSubmit(values)
-          }
-        }"
-      >
+        if (stepIndex === steps.length && meta.valid) {
+          onSubmit(values)
+        }
+      }">
+        <!-- Setando os valores no hook de montagem, mas agora DENTRO do formulário -->
+        <div v-if="stepIndex === 1" style="display: none">
+          {{ setFieldValue('firstname', firstname) }}
+          {{ setFieldValue('surname', surname) }}
+          {{ setFieldValue('email', email) }}
+        </div>
         <div class="flex w-full flex-start gap-2">
-          <StepperItem
-            v-for="step in steps"
-            :key="step.step"
-            v-slot="{ state }"
-            class="relative flex w-full flex-col items-center justify-center"
-            :step="step.step"
-          >
-            <StepperSeparator
-              v-if="step.step !== steps[steps.length - 1].step"
-              class="absolute left-[calc(50%+20px)] right-[calc(-50%+10px)] top-5 block h-0.5 shrink-0 rounded-full bg-muted group-data-[state=completed]:bg-primary"
-            />
+          <StepperItem v-for="step in steps" :key="step.step" v-slot="{ state }"
+            class="relative flex w-full flex-col items-center justify-center" :step="step.step">
+            <StepperSeparator v-if="step.step !== steps[steps.length - 1].step"
+              class="absolute left-[calc(50%+20px)] right-[calc(-50%+10px)] top-5 block h-0.5 shrink-0 rounded-full bg-muted group-data-[state=completed]:bg-primary" />
 
             <StepperTrigger as-child>
-              <Button
-                :variant="state === 'completed' || state === 'active' ? 'default' : 'outline'"
-                size="icon"
+              <Button :variant="state === 'completed' || state === 'active' ? 'default' : 'outline'" size="icon"
                 class="z-10 rounded-full shrink-0"
                 :class="[state === 'active' && 'ring-2 ring-ring ring-offset-2 ring-offset-background']"
-                :disabled="state !== 'completed' && !meta.valid"
-              >
+                :disabled="state !== 'completed' && !meta.valid">
                 <Check v-if="state === 'completed'" class="size-5" />
                 <Circle v-if="state === 'active'" />
                 <Dot v-if="state === 'inactive'" />
@@ -128,16 +128,12 @@ function onSubmit(values: any) {
             </StepperTrigger>
 
             <div class="mt-5 flex flex-col items-center text-center">
-              <StepperTitle
-                :class="[state === 'active' && 'text-primary']"
-                class="text-sm font-semibold transition lg:text-base"
-              >
+              <StepperTitle :class="[state === 'active' && 'text-primary']"
+                class="text-sm font-semibold transition lg:text-base">
                 {{ step.title }}
               </StepperTitle>
-              <StepperDescription
-                :class="[state === 'active' && 'text-primary']"
-                class="sr-only text-xs text-muted-foreground transition md:not-sr-only lg:text-sm"
-              >
+              <StepperDescription :class="[state === 'active' && 'text-primary']"
+                class="sr-only text-xs text-muted-foreground transition md:not-sr-only lg:text-sm">
                 {{ step.description }}
               </StepperDescription>
             </div>
@@ -146,21 +142,21 @@ function onSubmit(values: any) {
 
         <div class="flex flex-col gap-4 mt-4">
           <template v-if="stepIndex === 1">
-            <FormField v-slot="{ componentField }" name="fullName">
+            <FormField v-slot="{ componentField }" name="firstname">
               <FormItem>
                 <FormLabel>Nome</FormLabel>
                 <FormControl>
-                  <Input type="text" v-bind="componentField" />
+                  <Input type="text" v-bind="componentField" disabled />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             </FormField>
 
-            <FormField v-slot="{ componentField }" name="fullName">
+            <FormField v-slot="{ componentField }" name="surname">
               <FormItem>
                 <FormLabel>Sobrenome</FormLabel>
                 <FormControl>
-                  <Input type="text" v-bind="componentField" />
+                  <Input type="text" v-bind="componentField" disabled />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -170,11 +166,49 @@ function onSubmit(values: any) {
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input type="email " v-bind="componentField" />
+                  <Input type="email " v-bind="componentField" disabled />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             </FormField>
+
+            <div class="flex gap-4">
+              <FormField v-slot="{ value, handleChange }" name="birthdate">
+                <FormItem class="flex flex-col">
+                  <label class="text-sm font-semibold">
+                    Data de Nascimento
+                  </label>
+                  <!-- <FormLabel>Data de nascimento</FormLabel> -->
+
+                  <Popover>
+                    <PopoverTrigger as-child>
+                      <FormControl>
+                        <Button variant="outline" :class="[
+                          !value && 'text-muted-foreground',
+                          'justify-start text-left font-normal w-full'
+                        ]">
+                          <span v-if="value">
+                            {{ new Date(value).toLocaleDateString('pt-BR', {
+                              day: '2-digit', month: 'long', year:
+                                'numeric'
+                            }) }}
+                          </span>
+                          <span v-else>Selecione</span>
+                          <CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+
+                    <PopoverContent class="w-auto p-0">
+                      <CalendarMonthYear :model-value="value" @update:model-value="handleChange" />
+                    </PopoverContent>
+                  </Popover>
+
+
+                  <FormMessage />
+                </FormItem>
+              </FormField>
+            </div>
           </template>
 
           <template v-if="stepIndex === 2">
@@ -235,12 +269,11 @@ function onSubmit(values: any) {
             Back
           </Button>
           <div class="flex items-center gap-3">
-            <Button v-if="stepIndex !== 3" :type="meta.valid ? 'button' : 'submit'" :disabled="isNextDisabled" size="sm" @click="meta.valid && nextStep()">
+            <Button v-if="stepIndex !== 3" :type="meta.valid ? 'button' : 'submit'" :disabled="isNextDisabled" size="sm"
+              @click="meta.valid && nextStep()">
               Next
             </Button>
-            <Button
-              v-if="stepIndex === 3" size="sm" type="submit"
-            >
+            <Button v-if="stepIndex === 3" size="sm" type="submit">
               Submit
             </Button>
           </div>

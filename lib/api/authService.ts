@@ -33,6 +33,11 @@ export interface RegisterPayload {
   passwordConfirmation: string
 }
 
+export interface ErrorResponse {
+  statusCode: number
+  message: string
+}
+
 export async function login(payload: LoginPayload): Promise<LoginResponse> {
   const config = useRuntimeConfig()
   try {
@@ -85,6 +90,7 @@ export async function activate(code: string): Promise<void> {
       method: 'PATCH',
     })
   } catch (err: any) {
+    console.error('Erro real no activate:', err)
     throw createError({ statusCode: err.statusCode, statusMessage: 'Erro ao ativar a conta', cause: err })
   }
 }
